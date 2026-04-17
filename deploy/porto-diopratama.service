@@ -1,0 +1,16 @@
+[Unit]
+Description=Porto Diopratama Next.js App
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/porto-diopratama/
+ExecStart=/usr/bin/npm run start -- --port 3000
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target

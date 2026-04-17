@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docs: keep only essential markdown files
+*.md
+!/README.md
+!/HOMESERVER_DEPLOY.md

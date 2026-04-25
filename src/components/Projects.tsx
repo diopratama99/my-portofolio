@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight, Smartphone } from 'lucide-react'
@@ -104,11 +104,18 @@ export default function Projects() {
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0)
   const [gallery, setGallery] = useState<{ screenshots: string[]; index: number } | null>(null)
+  const [paused, setPaused] = useState(false)
 
-  const go = (dir: number) => {
+  const go = useCallback((dir: number) => {
     setDirection(dir)
     setCurrent(c => (c + dir + projects.length) % projects.length)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (paused || gallery || !inView) return
+    const id = setInterval(() => go(1), 3000)
+    return () => clearInterval(id)
+  }, [paused, gallery, inView, go])
 
   const slideVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0 }),
@@ -122,27 +129,54 @@ export default function Projects() {
   return (
     <section id="projects" className="w-full h-full flex flex-col justify-center overflow-hidden" ref={ref}>
 
-      {/* Section label — top-left */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={inView ? { opacity: 1, x: 0 } : {}}
-        transition={{ duration: 0.4 }}
-        className="px-8 md:px-16 pt-8 pb-4"
-      >
-        <p className="text-xs tracking-[0.3em] uppercase" style={{ color: 'var(--accent)' }}>
-          {t.projects.subtitle}
-        </p>
-        <h2 className="text-4xl md:text-5xl font-bold mt-1"
-          style={{
-            background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          }}>
-          {t.projects.title}
-        </h2>
-      </motion.div>
+      {/* Section header */}
+      <div className="px-6 md:px-12 lg:px-20 pt-10 pb-4">
+        {/* Section index */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex items-center gap-4 mb-5"
+        >
+          <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>05 / PROJECTS</span>
+          <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
+          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>{t.projects.subtitle}</span>
+        </motion.div>
+
+        {/* Big title */}
+        <div className="overflow-hidden mb-1">
+          <motion.h2
+            initial={{ y: '100%' }}
+            animate={inView ? { y: 0 } : { y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="font-display font-bold uppercase leading-none"
+            style={{
+              fontSize: 'clamp(2.2rem, 6vw, 5.5rem)',
+              WebkitTextStroke: '1.5px rgba(226,232,240,0.6)',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {t.projects.title}
+          </motion.h2>
+        </div>
+
+        {/* Horizontal divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-px mt-4 origin-left"
+          style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)' }}
+        />
+      </div>
 
       {/* Carousel */}
-      <div className="flex-1 px-8 md:px-16 overflow-hidden flex flex-col justify-center">
+      <div
+        className="flex-1 px-6 md:px-12 lg:px-20 overflow-hidden flex flex-col justify-center"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -230,8 +264,8 @@ export default function Projects() {
 
                   <div className="flex flex-wrap gap-2 mb-5">
                     {info.tags.map(tag => (
-                      <span key={tag} className="px-4 py-1.5 rounded-full text-xs font-semibold"
-                        style={{ background: `${proj.color}18`, border: `1px solid ${proj.color}45`, color: proj.color }}>
+                      <span key={tag} className="px-3 py-1 text-xs font-semibold tracking-wider uppercase"
+                        style={{ background: `${proj.color}15`, border: `1px solid ${proj.color}40`, color: proj.color, borderRadius: '4px' }}>
                         {tag}
                       </span>
                     ))}
@@ -258,12 +292,12 @@ export default function Projects() {
                       whileHover={{ scale: 1.04, x: 4 }}
                       whileTap={{ scale: 0.96 }}
                       onClick={() => setGallery({ screenshots: proj.screenshots, index: 0 })}
-                      className="flex items-center gap-3 px-6 py-3 rounded-full text-sm font-bold cursor-pointer"
+                      className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
                       style={{
-                        background: `${proj.color}22`,
-                        border: `1px solid ${proj.color}55`,
+                        background: `${proj.color}20`,
+                        border: `1px solid ${proj.color}50`,
                         color: proj.color,
-                        boxShadow: `0 0 20px ${proj.color}18`,
+                        borderRadius: '6px',
                       }}
                     >
                       <Smartphone size={16} />
@@ -276,12 +310,13 @@ export default function Projects() {
                       rel="noopener noreferrer"
                       whileHover={{ scale: 1.04, x: 4 }}
                       whileTap={{ scale: 0.96 }}
-                      className="flex items-center gap-3 px-6 py-3 rounded-full text-sm font-bold cursor-pointer"
+                      className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.15)',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.12)',
                         color: 'rgba(226,232,240,0.8)',
                         textDecoration: 'none',
+                        borderRadius: '6px',
                       }}
                     >
                       <SiGithub size={16} />
@@ -297,22 +332,22 @@ export default function Projects() {
         {/* Carousel nav */}
         <div className="flex items-center justify-center gap-6 mt-6">
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => go(-1)}
-            className="p-3 rounded-full cursor-pointer"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+            className="p-3 cursor-pointer"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', borderRadius: '6px' }}>
             <ChevronLeft size={20} />
           </motion.button>
 
           <div className="flex gap-2">
             {projects.map((p, i) => (
               <button key={i} onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i) }}
-                className="rounded-full transition-all duration-300 cursor-pointer"
-                style={{ width: i === current ? 32 : 8, height: 8, background: i === current ? p.color : 'rgba(255,255,255,0.15)' }} />
+                className="transition-all duration-300 cursor-pointer"
+                style={{ width: i === current ? 32 : 8, height: 4, background: i === current ? p.color : 'rgba(255,255,255,0.15)', borderRadius: '2px' }} />
             ))}
           </div>
 
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => go(1)}
-            className="p-3 rounded-full cursor-pointer"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+            className="p-3 cursor-pointer"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', borderRadius: '6px' }}>
             <ChevronRight size={20} />
           </motion.button>
         </div>

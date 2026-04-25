@@ -53,7 +53,7 @@ const eduItems = [
 
 /* ── Single timeline entry ── */
 function TimelineItem({
-  color, icon: Icon, title, subtitle, period, desc, index, inView, isLast,
+  color, title, subtitle, period, desc, index, inView, isLast,
 }: {
   color: string
   icon: React.ElementType
@@ -67,54 +67,37 @@ function TimelineItem({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.45, delay: 0.2 + index * 0.14 }}
-      className="relative flex gap-5"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: 0.2 + index * 0.12 }}
+      className="relative flex gap-4"
+      style={{ paddingBottom: isLast ? 0 : '2rem' }}
     >
-      {/* Icon + animated connector line */}
-      <div className="flex flex-col items-center">
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={inView ? { scale: 1, opacity: 1 } : {}}
-          transition={{ duration: 0.35, delay: 0.25 + index * 0.14, type: 'spring', stiffness: 260 }}
-          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10"
+      {/* Left accent line */}
+      <div className="flex flex-col items-center pt-1.5 shrink-0" style={{ width: 2 }}>
+        <div
+          className="w-full flex-1"
           style={{
-            background: `${color}20`,
-            border: `1.5px solid ${color}60`,
-            boxShadow: `0 0 18px ${color}30`,
+            background: isLast
+              ? `linear-gradient(to bottom, ${color}, transparent)`
+              : color,
           }}
-        >
-          <Icon size={16} style={{ color }} />
-        </motion.div>
-
-        {!isLast && (
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={inView ? { scaleY: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.45 + index * 0.14, ease: 'easeOut' }}
-            className="w-px flex-1 mt-2 origin-top"
-            style={{ background: `linear-gradient(to bottom, ${color}50, transparent)` }}
-          />
-        )}
+        />
       </div>
 
       {/* Text content */}
-      <div className="pb-8 flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <h4 className="text-base font-bold" style={{ color: '#E2E8F0' }}>{title}</h4>
-          <motion.span
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={inView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.3, delay: 0.35 + index * 0.14 }}
-            className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold"
-            style={{ background: `${color}18`, border: `1px solid ${color}45`, color }}
+      <div className="flex-1 min-w-0 pb-2">
+        <div className="flex flex-wrap items-start gap-x-3 gap-y-1 mb-1">
+          <h4 className="text-sm font-bold leading-snug" style={{ color: '#E2E8F0' }}>{title}</h4>
+          <span
+            className="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase shrink-0"
+            style={{ background: `${color}15`, border: `1px solid ${color}40`, color, borderRadius: '3px' }}
           >
             {period}
-          </motion.span>
+          </span>
         </div>
-        <p className="text-sm font-medium mb-2" style={{ color: `${color}cc` }}>{subtitle}</p>
-        <p className="text-sm leading-relaxed" style={{ color: 'rgba(148,163,184,0.7)' }}>{desc}</p>
+        <p className="text-xs font-semibold mb-2 tracking-wide" style={{ color: `${color}bb` }}>{subtitle}</p>
+        <p className="text-xs leading-relaxed" style={{ color: 'rgba(148,163,184,0.65)' }}>{desc}</p>
       </div>
     </motion.div>
   )
@@ -133,180 +116,105 @@ export default function Experience() {
       style={{ background: 'var(--bg-primary)' }}
       ref={ref}
     >
-      {/* ── Decorative background blobs ── */}
-      <motion.div
-        animate={{ x: [0, 18, -10, 0], y: [0, -14, 20, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute pointer-events-none"
-        style={{
-          width: 480, height: 480,
-          top: '-10%', left: '-8%',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-        }}
-      />
-      <motion.div
-        animate={{ x: [0, -20, 12, 0], y: [0, 16, -18, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-        className="absolute pointer-events-none"
-        style={{
-          width: 400, height: 400,
-          bottom: '-5%', right: '-5%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-        }}
-      />
+      <div className="relative z-10 w-full px-6 md:px-12 lg:px-20 py-16 flex flex-col justify-center h-full">
 
-      {/* ── Subtle dot-grid overlay ── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(148,163,184,0.055) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
-
-      <div className="relative flex h-full">
-
-        {/* ── Left: hero title + stats ── */}
-        <div
-          className="hidden md:flex flex-col justify-center px-12 lg:px-16 shrink-0 relative"
-          style={{ width: '34%', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+        {/* Section index */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex items-center gap-4 mb-6"
         >
-          {/* Vertical accent line */}
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={inView ? { scaleY: 1 } : {}}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute left-0 top-1/4 bottom-1/4 w-px origin-top"
-            style={{ background: 'linear-gradient(to bottom, transparent, #3B82F650, transparent)' }}
-          />
+          <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>03 / EXPERIENCE</span>
+          <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
+          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>{t.experience.subtitle}</span>
+        </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0, x: -20 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.4 }}
-            className="text-xs tracking-[0.3em] uppercase mb-3"
-            style={{ color: 'var(--accent)' }}
-          >
-            {t.experience.subtitle}
-          </motion.p>
-
+        {/* Big title */}
+        <div className="overflow-hidden mb-1">
           <motion.h2
-            initial={{ opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.55, delay: 0.06 }}
-            className="font-bold leading-none tracking-tight mb-8"
+            initial={{ y: '100%' }}
+            animate={inView ? { y: 0 } : { y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="font-display font-bold uppercase leading-none"
             style={{
-              fontSize: 'clamp(2.8rem, 4vw, 5rem)',
-              background: 'linear-gradient(160deg, #E2E8F0 0%, #60A5FA 60%, #818CF8 100%)',
-              WebkitBackgroundClip: 'text',
+              fontSize: 'clamp(2.8rem, 8vw, 7rem)',
+              WebkitTextStroke: '1.5px rgba(226,232,240,0.6)',
               WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              letterSpacing: '-0.02em',
             }}
           >
-            {t.experience.title}
+            {lang === 'id' ? 'Pengalaman' : 'Experience'}
           </motion.h2>
-
-          {/* Legend */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.4, delay: 0.45 }}
-            className="flex flex-col gap-2"
-          >
-            {[
-              { dot: '#3B82F6', label: t.experience.workTitle },
-              { dot: '#6366F1', label: t.experience.eduTitle  },
-            ].map(({ dot, label }) => (
-              <div key={label} className="flex items-center gap-2.5">
-                <motion.div
-                  animate={{ scale: [1, 1.4, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: dot, boxShadow: `0 0 8px ${dot}` }}
-                />
-                <span className="text-xs" style={{ color: 'rgba(148,163,184,0.5)' }}>{label}</span>
-              </div>
-            ))}
-          </motion.div>
         </div>
 
-        {/* ── Right: timeline ── */}
-        <div className="flex-1 flex flex-col justify-center px-8 md:px-12 py-10 overflow-y-auto">
+        {/* Horizontal divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-px mb-10 origin-left"
+          style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)' }}
+        />
 
-          {/* Mobile header */}
-          <div className="md:hidden mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase mb-1" style={{ color: 'var(--accent)' }}>
-              {t.experience.subtitle}
-            </p>
-            <h2
-              className="text-4xl font-bold"
-              style={{
-                background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
+        {/* Column labels + timelines */}
+        <div className="grid md:grid-cols-2 gap-x-16 gap-y-10">
+          {/* Work */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className="flex items-center gap-3 mb-6"
             >
-              {t.experience.title}
-            </h2>
+              <Briefcase size={13} style={{ color: '#3B82F6' }} />
+              <span className="text-xs tracking-widest uppercase font-semibold" style={{ color: 'rgba(148,163,184,0.5)' }}>
+                {t.experience.workTitle}
+              </span>
+            </motion.div>
+            {workItems.map((item, i) => (
+              <TimelineItem
+                key={i}
+                color={item.color}
+                icon={Briefcase}
+                title={lang === 'id' ? item.role.id   : item.role.en}
+                subtitle={item.company}
+                period={lang === 'id' ? item.period.id : item.period.en}
+                desc={lang === 'id'   ? item.desc.id   : item.desc.en}
+                index={i}
+                inView={inView}
+                isLast={i === workItems.length - 1}
+              />
+            ))}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-x-12">
-            {/* Work */}
-            <div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="text-xs tracking-[0.25em] uppercase font-semibold mb-6"
-                style={{ color: 'rgba(148,163,184,0.4)' }}
-              >
-                {t.experience.workTitle}
-              </motion.p>
-              {workItems.map((item, i) => (
-                <TimelineItem
-                  key={i}
-                  color={item.color}
-                  icon={Briefcase}
-                  title={lang === 'id' ? item.role.id   : item.role.en}
-                  subtitle={item.company}
-                  period={lang === 'id' ? item.period.id : item.period.en}
-                  desc={lang === 'id'   ? item.desc.id   : item.desc.en}
-                  index={i}
-                  inView={inView}
-                  isLast={i === workItems.length - 1}
-                />
-              ))}
-            </div>
-
-            {/* Education */}
-            <div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="text-xs tracking-[0.25em] uppercase font-semibold mb-6"
-                style={{ color: 'rgba(148,163,184,0.4)' }}
-              >
+          {/* Education */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className="flex items-center gap-3 mb-6"
+            >
+              <GraduationCap size={13} style={{ color: '#6366F1' }} />
+              <span className="text-xs tracking-widest uppercase font-semibold" style={{ color: 'rgba(148,163,184,0.5)' }}>
                 {t.experience.eduTitle}
-              </motion.p>
-              {eduItems.map((item, i) => (
-                <TimelineItem
-                  key={i}
-                  color={item.color}
-                  icon={GraduationCap}
-                  title={lang === 'id' ? item.degree.id : item.degree.en}
-                  subtitle={item.school}
-                  period={lang === 'id' ? item.period.id : item.period.en}
-                  desc={lang === 'id'   ? item.desc.id   : item.desc.en}
-                  index={i}
-                  inView={inView}
-                  isLast={i === eduItems.length - 1}
-                />
-              ))}
-            </div>
+              </span>
+            </motion.div>
+            {eduItems.map((item, i) => (
+              <TimelineItem
+                key={i}
+                color={item.color}
+                icon={GraduationCap}
+                title={lang === 'id' ? item.degree.id : item.degree.en}
+                subtitle={item.school}
+                period={lang === 'id' ? item.period.id : item.period.en}
+                desc={lang === 'id'   ? item.desc.id   : item.desc.en}
+                index={i}
+                inView={inView}
+                isLast={i === eduItems.length - 1}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronDown, Download } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Download } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import ParticleBackground from './ParticleBackground'
 
@@ -35,215 +35,248 @@ export default function Hero() {
     return () => clearTimeout(timeout)
   }, [displayText, isDeleting, roleIndex, t.hero.roles])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.3 },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  }
-
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
-      {/* Three.js Particle Background */}
       <ParticleBackground />
-
-      {/* Radial gradient overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(59,130,246,0.06) 0%, transparent 70%)',
-        }}
-      />
 
       {/* Bottom fade */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-40"
+        className="absolute bottom-0 left-0 right-0 h-48 z-10"
         style={{
           background: 'linear-gradient(to bottom, transparent, var(--bg-primary))',
         }}
       />
 
-      {/* Content */}
+      {/* Corner index — brutalist accent */}
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 max-w-4xl mx-auto px-6 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.3 }}
+        className="absolute top-8 right-6 md:right-12 lg:right-20 z-10 font-mono text-xs tracking-widest select-none"
+        style={{ color: 'rgba(59,130,246,0.35)' }}
       >
-        {/* Badge */}
-        <motion.div variants={itemVariants} className="flex justify-center mb-6">
+        01 / PORTFOLIO
+      </motion.div>
+
+      {/* Main content */}
+      <div className="relative z-10 w-full px-6 md:px-12 lg:px-20 pt-24 pb-16">
+
+        {/* Status badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex items-center gap-4 mb-10"
+        >
           <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+            className="h-px w-12"
+            style={{ background: 'rgba(59,130,246,0.5)' }}
+          />
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
             style={{
-              background: 'rgba(16,185,129,0.1)',
-              border: '1px solid rgba(16,185,129,0.35)',
+              background: 'rgba(16,185,129,0.08)',
+              border: '1px solid rgba(16,185,129,0.3)',
               color: '#34D399',
+              borderRadius: '4px',
             }}
           >
             <span
-              className="w-2 h-2 rounded-full animate-pulse"
+              className="w-1.5 h-1.5 rounded-full animate-pulse"
               style={{ background: '#10B981', boxShadow: '0 0 6px #10B981' }}
             />
             Available for Work
           </div>
         </motion.div>
 
-        {/* Greeting */}
-        <motion.p
-          variants={itemVariants}
-          className="text-lg md:text-xl mb-2"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          {t.hero.greeting}
-        </motion.p>
+        {/* Giant name — 1 line: "Dio" outline + "Pratama" gradient */}
+        <div className="overflow-hidden leading-none">
+          <motion.h1
+            initial={{ y: '105%' }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
+            className="font-display font-bold uppercase leading-none whitespace-nowrap"
+            style={{ fontSize: 'clamp(2.4rem, 7.5vw, 8.5rem)', letterSpacing: '-0.02em' }}
+          >
+            <span style={{
+              WebkitTextStroke: '2px rgba(226,232,240,0.75)',
+              WebkitTextFillColor: 'transparent',
+            }}>Dio&nbsp;</span>
+            <span style={{
+              background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 45%, #818CF8 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>Pratama</span>
+          </motion.h1>
+        </div>
 
-        {/* Name */}
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 leading-tight tracking-tight"
+        {/* Horizontal divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-px mt-8 mb-8 origin-left"
           style={{
-            background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 50%, #818CF8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            background:
+              'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.4), transparent)',
           }}
-        >
-          Dio Pratama
-        </motion.h1>
+        />
 
-        {/* Typewriter role */}
+        {/* Bottom row: role (left) + CTAs (right) */}
         <motion.div
-          variants={itemVariants}
-          className="h-10 flex items-center justify-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-8"
         >
-          <span
-            className="text-xl md:text-2xl font-mono"
-            style={{ color: 'var(--accent-light)' }}
-          >
-            {displayText}
+          {/* Typewriter role */}
+          <div className="flex flex-col gap-1.5">
             <span
-              className="animate-pulse ml-0.5"
-              style={{ color: 'var(--accent)' }}
+              className="text-xs tracking-widest uppercase font-medium"
+              style={{ color: 'var(--text-muted)' }}
             >
-              |
+              {t.hero.greeting}
             </span>
-          </span>
-        </motion.div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-6 h-px flex-shrink-0"
+                style={{ background: 'rgba(59,130,246,0.6)' }}
+              />
+              <span
+                className="text-xl md:text-2xl font-mono font-medium"
+                style={{ color: 'var(--accent-light)' }}
+              >
+                {displayText}
+                <span className="animate-pulse ml-0.5" style={{ color: 'var(--accent)' }}>
+                  |
+                </span>
+              </span>
+            </div>
+          </div>
 
-        {/* CTAs */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() =>
-              document.getElementById('scroll-container')?.scrollTo({
-                top: 4 * window.innerHeight,
-                behavior: 'smooth',
-              })
-            }
-            className="px-8 py-3 rounded-full font-semibold text-white cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
-              boxShadow: '0 0 30px rgba(59,130,246,0.4)',
-            }}
-          >
-            {t.hero.cta}
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() =>
-              document.getElementById('scroll-container')?.scrollTo({
-                top: 5 * window.innerHeight,
-                behavior: 'smooth',
-              })
-            }
-            className="px-8 py-3 rounded-full font-semibold cursor-pointer"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(59,130,246,0.5)',
-              color: 'var(--accent-light)',
-            }}
-          >
-            {t.hero.ctaSecondary}
-          </motion.button>
-
-          <motion.a
-            href="/cv-dio-pratama.pdf"
-            download
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-8 py-3 rounded-full font-semibold cursor-pointer"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(148,163,184,0.25)',
-              color: 'rgba(148,163,184,0.7)',
-              textDecoration: 'none',
-            }}
-          >
-            <Download size={16} />
-            {t.hero.downloadCv}
-          </motion.a>
-        </motion.div>
-
-        {/* Tech badges */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-wrap items-center justify-center gap-3 mt-12"
-        >
-          {['Flutter', 'React', 'Laravel', 'Python', 'Three.js'].map((tech) => (
-            <span
-              key={tech}
-              className="px-3 py-1 rounded-full text-xs font-medium"
+          {/* CTAs */}
+          <div className="flex flex-wrap items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() =>
+                document.getElementById('scroll-container')?.scrollTo({
+                  top: 4 * window.innerHeight,
+                  behavior: 'smooth',
+                })
+              }
+              className="flex items-center gap-2 px-7 py-3 font-semibold text-white cursor-pointer"
               style={{
-                background: 'rgba(17,34,64,0.8)',
-                border: '1px solid rgba(59,130,246,0.2)',
+                background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
+                boxShadow: '0 0 28px rgba(59,130,246,0.4)',
+                borderRadius: '6px',
+              }}
+            >
+              {t.hero.cta}
+              <ArrowRight size={16} />
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() =>
+                document.getElementById('scroll-container')?.scrollTo({
+                  top: 5 * window.innerHeight,
+                  behavior: 'smooth',
+                })
+              }
+              className="flex items-center gap-2 px-7 py-3 font-semibold cursor-pointer"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(59,130,246,0.45)',
+                color: 'var(--accent-light)',
+                borderRadius: '6px',
+              }}
+            >
+              {t.hero.ctaSecondary}
+              <ArrowUpRight size={16} />
+            </motion.button>
+
+            <motion.a
+              href="/cv-dio-pratama.pdf"
+              download
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-2 px-7 py-3 font-semibold cursor-pointer"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(148,163,184,0.2)',
+                color: 'rgba(148,163,184,0.6)',
+                textDecoration: 'none',
+                borderRadius: '6px',
+              }}
+            >
+              <Download size={15} />
+              {t.hero.downloadCv}
+            </motion.a>
+          </div>
+        </motion.div>
+
+        {/* Tech stack badges */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
+          className="flex flex-wrap items-center gap-2 mt-10"
+        >
+          {['Flutter', 'React', 'Laravel', 'Python', 'Three.js'].map((tech, i) => (
+            <motion.span
+              key={tech}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 + i * 0.07 }}
+              className="px-3 py-1 text-xs font-medium tracking-widest uppercase"
+              style={{
+                background: 'rgba(17,34,64,0.55)',
+                border: '1px solid rgba(59,130,246,0.18)',
                 color: 'var(--text-muted)',
+                borderRadius: '4px',
               }}
             >
               {tech}
-            </span>
+            </motion.span>
           ))}
         </motion.div>
-      </motion.div>
+      </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — vertical line on right */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer"
+        transition={{ delay: 1.6 }}
+        className="absolute bottom-10 right-6 md:right-12 lg:right-20 flex flex-col items-center gap-2 cursor-pointer z-10"
         onClick={() =>
           document.getElementById('scroll-container')?.scrollTo({
-          top: 1 * window.innerHeight,
-          behavior: 'smooth',
-        })
+            top: 1 * window.innerHeight,
+            behavior: 'smooth',
+          })
         }
       >
-        <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>
+        <span
+          className="text-xs tracking-widest uppercase"
+          style={{
+            color: 'var(--text-muted)',
+            writingMode: 'vertical-rl',
+            letterSpacing: '0.18em',
+          }}
+        >
           {t.hero.scrollDown}
         </span>
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          style={{ color: 'var(--accent)' }}
-        >
-          <ChevronDown size={20} />
-        </motion.div>
+          animate={{ scaleY: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-px h-14 origin-bottom"
+          style={{ background: 'linear-gradient(to bottom, var(--accent), transparent)' }}
+        />
       </motion.div>
     </section>
   )

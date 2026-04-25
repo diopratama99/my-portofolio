@@ -26,7 +26,7 @@ export const translations = {
       role: 'Role',
       roleValue: 'IT Support & Student',
       education: 'Education',
-      educationValue: 'Informatics Engineering (S1), Semester 3',
+      educationValue: 'Informatics Engineering (S1), 3rd Semester',
       focus: 'Focus',
       focusValue: 'Data Science Program',
       homelab: 'Homelab',

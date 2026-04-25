@@ -1,76 +1,87 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function CustomCursor() {
   const dotRef  = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
+  const [hovered, setHovered]   = useState(false)
+  const [clicking, setClicking] = useState(false)
 
   useEffect(() => {
-    // Only enable on non-touch devices
     if (typeof window === 'undefined' || window.matchMedia('(pointer: coarse)').matches) return
 
     document.body.style.cursor = 'none'
 
-    let mx = -100, my = -100   // mouse pos
-    let rx = -100, ry = -100   // ring pos (lerped)
+    let mx = -200, my = -200
+    let rx = -200, ry = -200
     let raf: number
 
-    const onMove = (e: MouseEvent) => {
-      mx = e.clientX
-      my = e.clientY
+    const onMove = (e: MouseEvent) => { mx = e.clientX; my = e.clientY }
+
+    // Delegation — works on dynamic elements too
+    const onOver  = (e: MouseEvent) => {
+      const t = e.target as Element
+      setHovered(!!t.closest('a, button, [role="button"], input, textarea, label, select, [tabindex]'))
     }
-    window.addEventListener('mousemove', onMove)
+    const onDown  = () => setClicking(true)
+    const onUp    = () => setClicking(false)
 
     const tick = () => {
-      // Dot snaps instantly
       if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${mx - 4}px, ${my - 4}px)`
+        dotRef.current.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`
       }
-      // Ring lerps behind with ~0.12 factor
-      rx += (mx - rx) * 0.12
-      ry += (my - ry) * 0.12
+      rx += (mx - rx) * 0.1
+      ry += (my - ry) * 0.1
       if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${rx - 20}px, ${ry - 20}px)`
+        ringRef.current.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`
       }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
 
-    // Scale ring on clickable hover
-    const onEnter = () => ringRef.current && (ringRef.current.style.transform += ' scale(1.6)')
-    const onLeave = () => {}
-
-    const addListeners = () => {
-      document.querySelectorAll('a,button,[role="button"]').forEach(el => {
-        el.addEventListener('mouseenter', onEnter)
-        el.addEventListener('mouseleave', onLeave)
-      })
-    }
-    addListeners()
+    window.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseover', onOver)
+    window.addEventListener('mousedown', onDown)
+    window.addEventListener('mouseup', onUp)
 
     return () => {
       document.body.style.cursor = ''
       window.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseover', onOver)
+      window.removeEventListener('mousedown', onDown)
+      window.removeEventListener('mouseup', onUp)
       cancelAnimationFrame(raf)
     }
   }, [])
 
+  const dotSize  = clicking ? 5  : 8
+  const ringSize = hovered  ? 52 : 36
+
   return (
     <>
-      {/* Dot */}
+      {/* Inner dot — snaps to cursor */}
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none w-2 h-2 rounded-full"
-        style={{ background: '#3B82F6', boxShadow: '0 0 6px #3B82F6' }}
+        className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full"
+        style={{
+          width: dotSize, height: dotSize,
+          background: hovered ? '#fff' : '#60A5FA',
+          boxShadow: `0 0 ${hovered ? 10 : 6}px ${hovered ? 'rgba(255,255,255,0.8)' : '#3B82F6'}`,
+          transition: 'width 0.15s ease, height 0.15s ease, background 0.2s ease, box-shadow 0.2s ease',
+          willChange: 'transform',
+        }}
       />
-      {/* Ring */}
+      {/* Outer ring — lags behind */}
       <div
         ref={ringRef}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none w-10 h-10 rounded-full"
+        className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full"
         style={{
-          border: '1.5px solid rgba(99,102,241,0.55)',
-          transition: 'transform 0.08s ease, opacity 0.2s',
+          width: ringSize, height: ringSize,
+          border: `1.5px solid ${hovered ? 'rgba(96,165,250,0.75)' : 'rgba(99,102,241,0.4)'}`,
+          boxShadow: hovered ? '0 0 14px rgba(59,130,246,0.25)' : 'none',
+          transition: 'width 0.22s ease, height 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease',
+          willChange: 'transform',
         }}
       />
     </>

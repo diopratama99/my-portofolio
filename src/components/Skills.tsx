@@ -7,7 +7,8 @@ import {
   SiFlutter, SiDart, SiReact, SiLaravel, SiPython, SiPhp,
   SiSqlite, SiPostgresql, SiMysql, SiSupabase, SiN8N,
   SiGit, SiLinux, SiTypescript, SiJavascript, SiHtml5,
-  SiCss, SiVscodium, SiGithub, SiFigma,
+  SiCss, SiVscodium, SiGithub, SiFigma, SiNextdotjs, SiThreedotjs,
+  SiTailwindcss, SiNodedotjs, SiDocker,
 } from 'react-icons/si'
 import { FaRobot, FaWindows, FaApple } from 'react-icons/fa'
 import type { IconType } from 'react-icons'
@@ -48,9 +49,13 @@ const rows: {
     dir: 'right',
     duration: '22s',
     items: [
-      { Icon: SiReact,   color: '#61DAFB', label: 'React' },
-      { Icon: SiLaravel, color: '#FF2D20', label: 'Laravel' },
-      { Icon: SiFlutter, color: '#54C5F8', label: 'Flutter' },
+      { Icon: SiNextdotjs,   color: '#E2E8F0', label: 'Next.js' },
+      { Icon: SiReact,       color: '#61DAFB', label: 'React' },
+      { Icon: SiTailwindcss, color: '#06B6D4', label: 'Tailwind CSS' },
+      { Icon: SiNodedotjs,   color: '#339933', label: 'Node.js' },
+      { Icon: SiLaravel,     color: '#FF2D20', label: 'Laravel' },
+      { Icon: SiFlutter,     color: '#54C5F8', label: 'Flutter' },
+      { Icon: SiThreedotjs,  color: '#6D6D6D', label: 'Three.js' },
     ],
   },
   {
@@ -71,20 +76,17 @@ const rows: {
     dir: 'right',
     duration: '30s',
     items: [
-      { Icon: SiN8N,     color: '#EA4B71', label: 'n8n' },
-      { Icon: FaRobot,   color: '#A78BFA', label: 'OpenClaw' },
-      { Icon: SiGit,     color: '#F05032', label: 'Git' },
-      { Icon: SiGithub,  color: '#E6EDF3', label: 'GitHub' },
-      { Icon: SiFigma,   color: '#F24E1E', label: 'Figma' },
+      { Icon: SiN8N,      color: '#EA4B71', label: 'n8n' },
+      { Icon: FaRobot,    color: '#A78BFA', label: 'OpenClaw' },
+      { Icon: SiDocker,   color: '#2496ED', label: 'Docker' },
+      { Icon: SiGit,      color: '#F05032', label: 'Git' },
+      { Icon: SiGithub,   color: '#E6EDF3', label: 'GitHub' },
+      { Icon: SiFigma,    color: '#F24E1E', label: 'Figma' },
       {
         customIcon: (
-          <div style={{
-            width: 64, height: 64, background: '#3955A3', borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: '-1px',
-          }}>Vs</div>
+          <img src="/visio.svg" alt="Visio" width={64} height={64} style={{ flexShrink: 0 }} />
         ),
-        color: '#fff',
+        color: '#2B7CD3',
         label: 'Visio',
       },
       { Icon: SiLinux,   color: '#FCC624', label: 'Linux' },
@@ -132,8 +134,8 @@ interface RowProps {
 }
 
 function IconRow({ label, dot, dir, duration, items, delay, inView }: RowProps) {
-  // Pad to at least 8 unique items so short rows always fill the viewport
-  const MIN = 8
+  // Pad to at least 20 unique items so each half covers any screen width (~2080px at 104px/icon)
+  const MIN = 20
   const padded: Tech[] = []
   while (padded.length < MIN) padded.push(...items)
   const doubled = [...padded, ...padded]
@@ -142,7 +144,7 @@ function IconRow({ label, dot, dir, duration, items, delay, inView }: RowProps) 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.45, delay }}
       className="flex flex-col gap-3"
     >
@@ -186,40 +188,56 @@ function IconRow({ label, dot, dir, duration, items, delay, inView }: RowProps) 
 export default function Skills() {
   const { t, lang } = useLanguage()
   const ref = useRef(null)
-  const inView = useInView(ref, { once: false, margin: '-60px' })
+  const inView = useInView(ref, { once: true, margin: '-60px' })
 
   return (
     <section
       id="skills"
-      className="w-full h-full px-0 py-12 flex flex-col justify-center overflow-hidden"
+      className="w-full h-full flex flex-col justify-center overflow-hidden"
       style={{ background: 'var(--bg-surface)' }}
       ref={ref}
     >
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-10 px-6"
-      >
-        <p className="text-xs tracking-[0.3em] uppercase mb-2" style={{ color: 'var(--accent)' }}>
-          {t.skills.subtitle}
-        </p>
-        <h2
-          className="text-3xl md:text-4xl font-bold"
-          style={{
-            background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          {t.skills.title}
-        </h2>
-      </motion.div>
+      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-8">
 
-      {/* Rows */}
-      <div className="flex flex-col gap-8">
+        {/* Section index */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex items-center gap-4 mb-6"
+        >
+          <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>04 / SKILLS</span>
+          <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
+          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>{t.skills.subtitle}</span>
+        </motion.div>
+
+        {/* Big title — 1 line */}
+        <div className="overflow-hidden mb-6">
+          <motion.h2
+            initial={{ y: '100%' }}
+            animate={inView ? { y: 0 } : { y: '100%' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="font-display font-bold uppercase leading-none whitespace-nowrap"
+            style={{ fontSize: 'clamp(2.8rem, 8vw, 7rem)', letterSpacing: '-0.02em' }}
+          >
+            <span style={{ WebkitTextStroke: '1.5px rgba(226,232,240,0.6)', WebkitTextFillColor: 'transparent' }}>Skills&nbsp;</span>
+            <span style={{ background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 45%, #818CF8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>&amp; Stack</span>
+          </motion.h2>
+        </div>
+
+        {/* Horizontal divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+          transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-px origin-left"
+          style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)' }}
+        />
+      </div>
+
+      {/* Marquee rows */}
+      <div className="flex flex-col gap-8 pb-10">
         {rows.map((row, i) => (
           <IconRow
             key={i}

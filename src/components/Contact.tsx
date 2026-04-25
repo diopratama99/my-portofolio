@@ -92,60 +92,76 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="w-full h-full flex flex-col px-8 md:px-16 py-8 overflow-hidden"
+      className="w-full h-full flex flex-col px-6 md:px-12 lg:px-20 py-10 overflow-hidden"
       style={{ background: 'var(--bg-primary)' }}
       ref={ref}
     >
-      {/* ── Top: hero text ── */}
-      <div className="flex flex-col justify-end" style={{ flex: '0 0 auto' }}>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.4 }}
-          className="text-sm md:text-base mb-3"
-          style={{ color: 'var(--text-muted)', maxWidth: 500 }}
-        >
-          {subLabel}
-        </motion.p>
+      {/* Section index */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="flex items-center gap-4 mb-5"
+        style={{ flex: '0 0 auto' }}
+      >
+        <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>06 / CONTACT</span>
+        <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
+        <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>
+          {lang === 'id' ? 'Hubungi Saya' : 'Get In Touch'}
+        </span>
+      </motion.div>
 
+      {/* Big title */}
+      <div className="overflow-hidden mb-1" style={{ flex: '0 0 auto' }}>
         <motion.a
           href={`mailto:${EMAIL}`}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, delay: 0.07 }}
-          whileHover={{ x: 6 }}
+          initial={{ y: '100%' }}
+          animate={inView ? { y: 0 } : { y: '100%' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
           className="group inline-flex items-end gap-3 cursor-pointer"
           style={{ textDecoration: 'none' }}
         >
           <span
-            className="font-bold leading-none tracking-tight"
+            className="font-display font-bold uppercase leading-none"
             style={{
-              fontSize: 'clamp(3rem, 9vw, 7.5rem)',
-              color: '#E2E8F0',
-              transition: 'color 0.2s',
+              fontSize: 'clamp(2.8rem, 8vw, 7rem)',
+              background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 45%, #818CF8 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.02em',
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#60A5FA')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#E2E8F0')}
           >
             {talkLabel}
           </span>
           <span
-            className="font-bold leading-none mb-2 transition-transform duration-200 group-hover:translate-x-2 group-hover:-translate-y-2"
-            style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)', color: 'var(--accent)' }}
+            className="font-bold leading-none mb-3 transition-transform duration-200 group-hover:translate-x-2 group-hover:-translate-y-2"
+            style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', color: 'var(--accent)' }}
           >
             ↗
           </span>
         </motion.a>
       </div>
 
-      {/* ── Divider ── */}
+      {/* Divider — right below the title */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={inView ? { scaleX: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.15 }}
-        className="my-5 h-px origin-left"
-        style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.4), transparent)' }}
+        transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="mt-4 mb-5 h-px origin-left"
+        style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)', flex: '0 0 auto' }}
       />
+
+      {/* Sub label */}
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.4, delay: 0.45 }}
+        className="text-sm mb-4"
+        style={{ color: 'var(--text-muted)', maxWidth: 520, flex: '0 0 auto' }}
+      >
+        {subLabel}
+      </motion.p>
 
       {/* ── Middle: links left + form right ── */}
       <motion.div
@@ -270,11 +286,12 @@ export default function Contact() {
                 disabled={status === 'sending'}
                 whileHover={status !== 'sending' ? { scale: 1.04, x: 4 } : {}}
                 whileTap={status !== 'sending' ? { scale: 0.96 } : {}}
-                className="flex items-center gap-2.5 px-7 py-2.5 rounded-full text-sm font-bold cursor-pointer"
+                className="flex items-center gap-2.5 px-7 py-2.5 text-sm font-bold cursor-pointer"
                 style={{
                   background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
                   color: '#fff',
                   border: 'none',
+                  borderRadius: '6px',
                   opacity: status === 'sending' ? 0.65 : 1,
                   boxShadow: '0 0 24px rgba(59,130,246,0.3)',
                 }}

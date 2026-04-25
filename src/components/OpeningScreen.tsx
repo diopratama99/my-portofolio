@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const greetings = [
@@ -17,16 +17,23 @@ const NAME_DURATION      = 1800  // ms name is shown
 
 interface Props { onDone: () => void }
 
+const TOTAL_MS = greetings.length * GREETING_DURATION + NAME_DURATION
+
 export default function OpeningScreen({ onDone }: Props) {
   const [index, setIndex]   = useState(0)
   const [phase, setPhase]   = useState<'greetings' | 'name' | 'exit'>('greetings')
+  const [liveProgress, setLiveProgress] = useState(0)
+  const startRef = useRef(Date.now())
 
-  // Progress: 0→1 over greetings, then 1 during name
-  const totalSteps = greetings.length + 1  // +1 for name step
-  const progress =
-    phase === 'greetings' ? (index + 1) / totalSteps
-    : phase === 'name'    ? 1
-    : 1
+  // Continuous real-time progress — update every 30ms
+  useEffect(() => {
+    const id = setInterval(() => {
+      const p = Math.min((Date.now() - startRef.current) / TOTAL_MS, 1)
+      setLiveProgress(p)
+      if (p >= 1) clearInterval(id)
+    }, 30)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     if (phase !== 'greetings') return
@@ -51,10 +58,10 @@ export default function OpeningScreen({ onDone }: Props) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-      style={{ background: 'var(--bg-primary)' }}
-      animate={phase === 'exit' ? { y: '-100%', opacity: 0 } : { y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: 'var(--bg-primary)', originY: 0 }}
+      animate={phase === 'exit' ? { scaleY: 0 } : { scaleY: 1 }}
+      transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
     >
       {/* Grid */}
       <div
@@ -68,35 +75,36 @@ export default function OpeningScreen({ onDone }: Props) {
       {/* Radial glow */}
       <div
         className="absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%,rgba(59,130,246,0.1) 0%,transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%,rgba(59,130,246,0.12) 0%,transparent 70%)' }}
       />
 
       <div className="relative z-10 flex flex-col items-center gap-10">
-        {/* Greeting text */}
         <AnimatePresence mode="wait">
           {phase === 'greetings' && (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col items-center"
             >
               <span
-                className="text-7xl md:text-9xl font-bold tracking-tight"
+                className="font-display font-bold tracking-tight uppercase leading-none"
                 style={{
-                  background: 'linear-gradient(135deg,#60A5FA 0%,#3B82F6 50%,#818CF8 100%)',
+                  fontSize: 'clamp(4rem, 14vw, 10rem)',
+                  background: 'linear-gradient(135deg,#E2E8F0 0%,#60A5FA 45%,#818CF8 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {greetings[index].text}
               </span>
               <span
-                className="mt-3 text-sm tracking-[0.4em] uppercase"
-                style={{ color: 'var(--text-muted)' }}
+                className="mt-4 text-xs tracking-[0.4em] uppercase font-mono"
+                style={{ color: 'rgba(148,163,184,0.5)' }}
               >
                 {greetings[index].lang}
               </span>
@@ -106,51 +114,62 @@ export default function OpeningScreen({ onDone }: Props) {
           {phase === 'name' && (
             <motion.div
               key="name"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center text-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center text-center gap-3"
             >
               <span
-                className="text-lg md:text-xl tracking-[0.3em] uppercase mb-3"
-                style={{ color: 'var(--text-muted)' }}
+                className="text-xs tracking-[0.5em] uppercase font-mono"
+                style={{ color: 'rgba(59,130,246,0.6)' }}
               >
                 I&apos;m
               </span>
-              <span
-                className="text-5xl md:text-7xl font-bold"
-                style={{
-                  background: 'linear-gradient(135deg,#60A5FA 0%,#3B82F6 50%,#818CF8 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Dio Pratama
-              </span>
+              {/* 1-line brutalist name: outline + gradient */}
+              <div className="overflow-hidden">
+                <span
+                  className="font-display font-bold uppercase leading-none whitespace-nowrap"
+                  style={{
+                    fontSize: 'clamp(3rem, 9vw, 7rem)',
+                    letterSpacing: '-0.02em',
+                    display: 'block',
+                  }}
+                >
+                  <span style={{
+                    WebkitTextStroke: '1.5px rgba(226,232,240,0.7)',
+                    WebkitTextFillColor: 'transparent',
+                  }}>Dio&nbsp;</span>
+                  <span style={{
+                    background: 'linear-gradient(135deg,#E2E8F0 0%,#60A5FA 45%,#818CF8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>Pratama</span>
+                </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Loading bar */}
-        <div className="flex flex-col items-center gap-2 w-48">
+        {/* Progress bar */}
+        <div className="flex flex-col items-center gap-2" style={{ width: 200 }}>
           <div
-            className="w-full h-0.5 rounded-full overflow-hidden"
-            style={{ background: 'rgba(59,130,246,0.15)' }}
+            className="w-full overflow-hidden"
+            style={{ height: 1, background: 'rgba(59,130,246,0.15)' }}
           >
             <motion.div
-              className="h-full rounded-full"
+              className="h-full"
               style={{ background: 'linear-gradient(90deg,#3B82F6,#818CF8)' }}
-              animate={{ width: `${progress * 100}%` }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
+              animate={{ width: `${liveProgress * 100}%` }}
+              transition={{ duration: 0.08, ease: 'linear' }}
             />
           </div>
           <span
-            className="text-[10px] tracking-[0.3em] uppercase"
-            style={{ color: 'rgba(148,163,184,0.5)' }}
+            className="text-[10px] tracking-[0.35em] uppercase font-mono"
+            style={{ color: 'rgba(148,163,184,0.4)' }}
           >
-            {phase === 'name' ? 'Welcome' : `${index + 1} / ${greetings.length}`}
+            {`${Math.round(liveProgress * 100)}%`}
           </span>
         </div>
       </div>

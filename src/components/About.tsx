@@ -111,7 +111,7 @@ export default function About() {
                   className="text-sm font-mono tracking-widest"
                   style={{ color: 'rgba(59,130,246,0.7)' }}
                 >
-                  — Dio Pratama
+                  Dio Pratama
                 </span>
               </motion.div>
             </div>

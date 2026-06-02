@@ -7,19 +7,29 @@ import { Briefcase, GraduationCap } from 'lucide-react'
 
 const workItems = [
   {
-    role:    { en: 'IT Support',        id: 'IT Support' },
+    role:    { en: 'Product Analyst Lead',        id: 'Product Analyst Lead' },
     company: 'PT. Karangmas Unggul',
-    period:  { en: '2023 – Present',    id: '2023 – Sekarang' },
+    period:  { en: '2025 - Present',    id: '2025 - Sekarang' },
     desc:    {
-      en: 'Maintain and troubleshoot company hardware, networks, and software. Manage internal IT infrastructure and provide end-user support.',
-      id: 'Memelihara dan menangani masalah hardware, jaringan, dan software perusahaan. Mengelola infrastruktur IT internal dan memberikan dukungan kepada pengguna.',
+      en: 'Designed comprehensive business and operational blueprints for a new agricultural subsidiary. Translated market needs into structured technical planning documents and product storytelling.',
+      id: 'Merancang blueprint bisnis dan operasional komprehensif untuk anak perusahaan agrikultur baru. Menerjemahkan kebutuhan pasar menjadi dokumen perencanaan teknis terstruktur dan product storytelling.',
+    },
+    color: '#8B5CF6',
+  },
+  {
+    role:    { en: 'IT Administrator & Web Developer',        id: 'IT Administrator & Web Developer' },
+    company: 'PT. Karangmas Unggul',
+    period:  { en: '2023 - Present',    id: '2023 - Sekarang' },
+    desc:    {
+      en: 'Designed, built, and maintained full-stack web applications for business digitization, while simultaneously managing the company\'s entire IT infrastructure (hardware, network, and servers) and disaster recovery procedures.',
+      id: 'Merancang, membangun, dan memelihara aplikasi web full-stack untuk digitalisasi bisnis, sekaligus mengelola seluruh infrastruktur IT perusahaan (hardware, jaringan, dan server) serta prosedur disaster recovery.',
     },
     color: '#3B82F6',
   },
   {
     role:    { en: 'Drafter (AutoCAD)', id: 'Drafter (AutoCAD)' },
     company: 'PT. Karangmas Unggul',
-    period:  { en: '2022 – 2024',       id: '2022 – 2024' },
+    period:  { en: '2022 - 2024',       id: '2022 - 2024' },
     desc:    {
       en: 'Created technical drawings and 2D layouts using AutoCAD for construction and engineering projects.',
       id: 'Membuat gambar teknik dan tata letak 2D menggunakan AutoCAD untuk proyek konstruksi dan rekayasa.',
@@ -32,17 +42,17 @@ const eduItems = [
   {
     degree:  { en: 'Informatics Engineering (S1)',         id: 'Teknik Informatika (S1)' },
     school:  'Universitas Mercubuana',
-    period:  { en: 'Jan 2025 – Present',                   id: 'Jan 2025 – Sekarang' },
+    period:  { en: 'Jan 2025 - Present',                   id: 'Jan 2025 - Sekarang' },
     desc:    {
-      en: 'Focus: Data Science program. Working-class student, currently in semester 3.',
-      id: 'Fokus: Program Studi Data Science. Kelas karyawan, saat ini semester 3.',
+      en: 'Informatics Engineering (S1) - Currently in semester 3.',
+      id: 'Teknik Informatika (S1) - Saat ini semester 3.',
     },
     color: '#6366F1',
   },
   {
-    degree:  { en: 'Vocational High School – DPIB',        id: 'SMK – Desain Pemodelan dan Informasi Bangunan' },
+    degree:  { en: 'Vocational High School - DPIB',        id: 'SMK - Desain Pemodelan dan Informasi Bangunan' },
     school:  'SMK Muhammadiyah 01 Cileungsi',
-    period:  { en: '2018 – 2021',                          id: '2018 – 2021' },
+    period:  { en: '2018 - 2021',                          id: '2018 - 2021' },
     desc:    {
       en: 'Majored in Building Design Modeling and Information (DPIB).',
       id: 'Jurusan Desain Pemodelan dan Informasi Bangunan (DPIB).',

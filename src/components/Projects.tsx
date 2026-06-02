@@ -3,44 +3,55 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Smartphone } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Smartphone, Globe, ExternalLink } from 'lucide-react'
 import { SiGithub } from 'react-icons/si'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const projects = [
   {
     key: 'temanku' as const,
+    type: 'mobile' as const,
     color: '#10B981',
     dim: '#064e3b',
     github: 'https://github.com/diopratama99/TemanKu',
     screenshots: [
-      '/screenshots/temanku/1_dashboard.png',
-      '/screenshots/temanku/2_statistik_ringkasan.png',
-      '/screenshots/temanku/3_statistik_detail.png',
-      '/screenshots/temanku/4_add_transaction.png',
-      '/screenshots/temanku/5_budgeting.png',
-      '/screenshots/temanku/6_analisa_tren_keuangan.png',
-      '/screenshots/temanku/7_perbandingan_bulanan.png',
-      '/screenshots/temanku/8_tabungan.png',
+      '/screenshots/temanku/temanku-1.jpeg',
+      '/screenshots/temanku/temanku-2.jpeg',
+      '/screenshots/temanku/temanku-3.jpeg',
     ],
   },
   {
     key: 'bensinku' as const,
-    color: '#0EA5E9',
-    dim: '#0c4a6e',
+    type: 'mobile' as const,
+    color: '#E9B341',
+    dim: '#B6841C',
     github: 'https://github.com/diopratama99/BensinKu',
     screenshots: [
-      '/screenshots/bensinku/Screenshot_20260414-142803.png',
-      '/screenshots/bensinku/Screenshot_20260414-142821.png',
-      '/screenshots/bensinku/Screenshot_20260414-142826.png',
-      '/screenshots/bensinku/Screenshot_20260414-142830.png',
-      '/screenshots/bensinku/Screenshot_20260414-142834.png',
-      '/screenshots/bensinku/Screenshot_20260414-142843.png',
-      '/screenshots/bensinku/Screenshot_20260414-142858.png',
-      '/screenshots/bensinku/Screenshot_20260414-142906.png',
-      '/screenshots/bensinku/Screenshot_20260414-142913.png',
-      '/screenshots/bensinku/Screenshot_20260414-142923.png',
-      '/screenshots/bensinku/Screenshot_20260414-143316.png',
+      '/screenshots/bensinku/bensinku-1.jpeg',
+      '/screenshots/bensinku/bensinku-2.jpeg',
+      '/screenshots/bensinku/bensinku-3.jpeg',
+    ],
+  },
+  {
+    key: 'ingatanku' as const,
+    type: 'mobile' as const,
+    color: '#6366f1',
+    dim: '#1e293b',
+    github: 'https://github.com/diopratama99/IngatanKu',
+    screenshots: [
+      '/screenshots/ingatanku/ingatanku-1.jpeg',
+      '/screenshots/ingatanku/ingatanku-2.jpeg',
+      '/screenshots/ingatanku/ingatanku-3.jpeg',
+    ],
+  },
+  {
+    key: 'sukadamai' as const,
+    type: 'web' as const,
+    color: '#2D6B3A',
+    dim: '#1a3a1a',
+    link: 'https://sukadamaifarm.com',
+    screenshots: [
+      '/screenshots/sukadamai-web/sukadamai-webpage.png',
     ],
   },
 ]
@@ -201,43 +212,69 @@ export default function Projects() {
                   <div className="absolute inset-0 -m-8 rounded-full blur-3xl opacity-25"
                     style={{ background: proj.color }} />
 
-                  <div className="relative flex gap-4 items-end">
-                    {proj.screenshots.slice(0, 3).map((src, si) => {
-                      const isCenter = si === 1
-                      return (
-                        <motion.div
-                          key={si}
-                          whileHover={{ y: -10, scale: 1.03 }}
-                          transition={{ duration: 0.22 }}
-                          className="relative cursor-pointer rounded-[20px] overflow-hidden shadow-2xl"
-                          style={{
-                            width: isCenter ? 175 : 145,
-                            height: isCenter ? 350 : 290,
-                            border: `2px solid ${proj.color}40`,
-                            boxShadow: isCenter
-                              ? `0 24px 64px rgba(0,0,0,0.6), 0 0 40px ${proj.color}20`
-                              : `0 16px 40px rgba(0,0,0,0.5)`,
-                            flexShrink: 0,
-                          }}
-                          onClick={() => setGallery({ screenshots: proj.screenshots, index: si })}
-                        >
-                          <Image src={src} alt={`${proj.key}-${si}`} fill className="object-cover" sizes="175px" />
-                          <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
-                            style={{ background: 'rgba(0,0,0,0.35)' }}>
-                            <Smartphone size={28} style={{ color: '#fff' }} />
-                          </div>
-                        </motion.div>
-                      )
-                    })}
-
-                    {/* +N badge */}
-                    {proj.screenshots.length > 3 && (
-                      <div className="absolute -bottom-3 -right-3 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold shadow-lg"
-                        style={{ background: proj.color, color: '#fff', boxShadow: `0 0 20px ${proj.color}60` }}>
-                        +{proj.screenshots.length - 3}
+                  {proj.type === 'web' ? (
+                    /* Web project — full clean screenshot, no chrome */
+                    <motion.div
+                      whileHover={{ y: -6, scale: 1.02 }}
+                      transition={{ duration: 0.22 }}
+                      className="relative cursor-pointer rounded-2xl overflow-hidden shadow-2xl"
+                      style={{
+                        width: 520,
+                        height: 320,
+                        border: `2px solid ${proj.color}40`,
+                        boxShadow: `0 24px 64px rgba(0,0,0,0.6), 0 0 40px ${proj.color}20`,
+                      }}
+                      onClick={() => setGallery({ screenshots: proj.screenshots, index: 0 })}
+                    >
+                      <Image src={proj.screenshots[0]} alt={proj.key} fill className="object-cover object-top" sizes="520px" />
+                      <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                        style={{ background: 'rgba(0,0,0,0.35)' }}>
+                        <Globe size={28} style={{ color: '#fff' }} />
                       </div>
-                    )}
-                  </div>
+                    </motion.div>
+                  ) : (
+                    /* Mobile project — triple phone layout, first screenshot centered */
+                    <div className="relative flex gap-4 items-end">
+                      {/* Reorder: [1, 0, 2] so screenshot-0 is in the center */}
+                      {[1, 0, 2].map((origIdx, displayIdx) => {
+                        const src = proj.screenshots[origIdx]
+                        if (!src) return null
+                        const isCenter = displayIdx === 1
+                        return (
+                          <motion.div
+                            key={origIdx}
+                            whileHover={{ y: -10, scale: 1.03 }}
+                            transition={{ duration: 0.22 }}
+                            className="relative cursor-pointer rounded-[20px] overflow-hidden shadow-2xl"
+                            style={{
+                              width: isCenter ? 175 : 145,
+                              height: isCenter ? 350 : 290,
+                              border: `2px solid ${proj.color}40`,
+                              boxShadow: isCenter
+                                ? `0 24px 64px rgba(0,0,0,0.6), 0 0 40px ${proj.color}20`
+                                : `0 16px 40px rgba(0,0,0,0.5)`,
+                              flexShrink: 0,
+                            }}
+                            onClick={() => setGallery({ screenshots: proj.screenshots, index: origIdx })}
+                          >
+                            <Image src={src} alt={`${proj.key}-${origIdx}`} fill className="object-cover" sizes="175px" />
+                            <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                              style={{ background: 'rgba(0,0,0,0.35)' }}>
+                              <Smartphone size={28} style={{ color: '#fff' }} />
+                            </div>
+                          </motion.div>
+                        )
+                      })}
+
+                      {/* +N badge */}
+                      {proj.screenshots.length > 3 && (
+                        <div className="absolute -bottom-3 -right-3 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold shadow-lg"
+                          style={{ background: proj.color, color: '#fff', boxShadow: `0 0 20px ${proj.color}60` }}>
+                          +{proj.screenshots.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* ── Info ── */}
@@ -300,28 +337,49 @@ export default function Projects() {
                         borderRadius: '6px',
                       }}
                     >
-                      <Smartphone size={16} />
+                      {proj.type === 'web' ? <Globe size={16} /> : <Smartphone size={16} />}
                       {t.projects.viewMore}
                     </motion.button>
 
-                    <motion.a
-                      href={proj.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.04, x: 4 }}
-                      whileTap={{ scale: 0.96 }}
-                      className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        color: 'rgba(226,232,240,0.8)',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                      }}
-                    >
-                      <SiGithub size={16} />
-                      GitHub
-                    </motion.a>
+                    {'github' in proj && proj.github ? (
+                      <motion.a
+                        href={proj.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.04, x: 4 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
+                        style={{
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          color: 'rgba(226,232,240,0.8)',
+                          textDecoration: 'none',
+                          borderRadius: '6px',
+                        }}
+                      >
+                        <SiGithub size={16} />
+                        GitHub
+                      </motion.a>
+                    ) : 'link' in proj && proj.link ? (
+                      <motion.a
+                        href={proj.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.04, x: 4 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
+                        style={{
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          color: 'rgba(226,232,240,0.8)',
+                          textDecoration: 'none',
+                          borderRadius: '6px',
+                        }}
+                      >
+                        <ExternalLink size={16} />
+                        {t.projects.visitSite}
+                      </motion.a>
+                    ) : null}
                   </div>
                 </div>
               </div>

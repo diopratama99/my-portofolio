@@ -54,6 +54,7 @@ export const translations = {
       title: 'Projects',
       subtitle: 'What I have built',
       viewMore: 'View Screenshots',
+      visitSite: 'Visit Site',
       close: 'Close',
       tech: 'Tech Stack',
       temanku: {
@@ -61,7 +62,7 @@ export const translations = {
         tagline: 'Your Personal Finance Companion',
         description:
           'A full-featured personal finance app built with Flutter. Manage multi-account balances, set category budgets, track savings goals, and analyze spending trends with AI-powered prediction and monthly hypothesis testing.',
-        tags: ['Flutter', 'SQLite', 'Google Sign-In', 'fl_chart'],
+        tags: ['Flutter', 'Supabase', 'Edge Functions', 'fl_chart'],
         features: ['AI trend prediction & analysis', 'Multi-account & transfer management', 'Budget per category + savings goals', 'Monthly comparison with statistics'],
       },
       bensinku: {
@@ -69,8 +70,24 @@ export const translations = {
         tagline: 'Drive Smart, Spend Wise.',
         description:
           'A smart fuel tracking app powered by Flutter & Supabase. Features real-time GPS trip tracking, intelligent fuel prediction using Fallback Multi-Window calculations, and detailed spending statistics per vehicle.',
-        tags: ['Flutter', 'Supabase', 'PostgreSQL', 'GPS'],
+        tags: ['Flutter', 'Supabase', 'Edge Functions', 'GPS'],
         features: ['Smart fuel prediction (GPS + fallback)', 'Real-time GPS trip tracker', 'Multi-vehicle management', 'Spending stats & fill-up history'],
+      },
+      ingatanku: {
+        name: 'IngatanKu',
+        tagline: 'Your Smart Learning Notebook.',
+        description:
+          'A personal note-taking and learning app with Flutter. Save notes from Instagram reels, YouTube videos, and articles, then chat with an AI assistant that answers based on your saved content.',
+        tags: ['Flutter', 'Supabase', 'pgvector', 'RAG'],
+        features: ['Save notes from social media & web', 'AI chat assistant with your notes', 'Tag-based organization & search', 'XP leveling & streak system'],
+      },
+      sukadamai: {
+        name: 'Sukadamai Farm',
+        tagline: 'Modern Editorial Web for Agriculture.',
+        description:
+          'A modern editorial-style website for Sukadamai, an eco-friendly poultry farm and agriculture business based in Bogor. Built with Laravel and React, featuring elegant typography, immersive visuals, multi-language support (ID/EN/JP/KR), product showcase, blog, and a farm visit booking system.',
+        tags: ['Laravel', 'React', 'Multi-language', 'Responsive'],
+        features: ['Editorial design with immersive visuals', 'Multi-language (ID/EN/JP/KR)', 'Product catalog & farm visit booking', 'Blog & gallery showcase'],
       },
     },
     contact: {
@@ -138,6 +155,7 @@ export const translations = {
       title: 'Proyek',
       subtitle: 'Apa yang sudah saya bangun',
       viewMore: 'Lihat Screenshot',
+      visitSite: 'Kunjungi Situs',
       close: 'Tutup',
       tech: 'Tech Stack',
       temanku: {
@@ -145,7 +163,7 @@ export const translations = {
         tagline: 'Teman Keuangan Pribadi Anda',
         description:
           'Aplikasi keuangan Flutter yang lengkap. Kelola saldo multi-akun, atur budget per kategori, pantau target tabungan, dan analisis tren pengeluaran dengan prediksi AI serta uji hipotesis perbandingan bulanan.',
-        tags: ['Flutter', 'SQLite', 'Google Sign-In', 'fl_chart'],
+        tags: ['Flutter', 'Supabase', 'Edge Functions', 'fl_chart'],
         features: ['Prediksi tren AI & analisis statistik', 'Multi-akun & transfer antar akun', 'Budget per kategori + target tabungan', 'Perbandingan bulanan dengan uji hipotesis'],
       },
       bensinku: {
@@ -153,8 +171,24 @@ export const translations = {
         tagline: 'Drive Smart, Spend Wise.',
         description:
           'Aplikasi pelacak BBM pintar dengan Flutter & Supabase. Dilengkapi GPS trip tracking real-time, prediksi bensin cerdas menggunakan kalkulasi Fallback Multi-Window, dan statistik pengeluaran per kendaraan.',
-        tags: ['Flutter', 'Supabase', 'PostgreSQL', 'GPS'],
+        tags: ['Flutter', 'Supabase', 'Edge Functions', 'GPS'],
         features: ['Smart prediction BBM (GPS + fallback)', 'GPS trip tracker real-time', 'Manajemen multi-kendaraan', 'Statistik & riwayat pengisian'],
+      },
+      ingatanku: {
+        name: 'IngatanKu',
+        tagline: 'Buku Catatan Belajar Pintar.',
+        description:
+          'Aplikasi pencatatan dan belajar personal dengan Flutter. Simpan catatan dari Instagram reels, video YouTube, dan artikel, lalu chat dengan asisten AI yang menjawab berdasarkan konten yang sudah kamu simpan.',
+        tags: ['Flutter', 'Supabase', 'pgvector', 'RAG'],
+        features: ['Simpan catatan dari medsos & web', 'Chat AI dengan catatanmu', 'Organisasi tag & pencarian', 'Sistem XP level & streak'],
+      },
+      sukadamai: {
+        name: 'Sukadamai Farm',
+        tagline: 'Web Editorial Modern untuk Agrikultur.',
+        description:
+          'Website bergaya editorial modern untuk Sukadamai, usaha peternakan dan agrikultur ramah lingkungan di Bogor. Dibangun dengan Laravel dan React, menampilkan tipografi elegan, visual imersif, dukungan multi-bahasa (ID/EN/JP/KR), katalog produk, blog, dan sistem booking kunjungan peternakan.',
+        tags: ['Laravel', 'React', 'Multi-bahasa', 'Responsif'],
+        features: ['Desain editorial dengan visual imersif', 'Multi-bahasa (ID/EN/JP/KR)', 'Katalog produk & booking kunjungan', 'Blog & galeri showcase'],
       },
     },
     contact: {

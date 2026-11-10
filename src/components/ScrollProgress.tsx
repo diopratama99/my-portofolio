@@ -1,39 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion, useSpring } from 'framer-motion'
+import { useRef } from 'react'
+import { gsap, useGSAP } from '@/lib/gsap'
 
 export default function ScrollProgress() {
-  const [progress, setProgress] = useState(0)
-  const spring = useSpring(0, { stiffness: 200, damping: 40 })
+  const bar = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const container = document.getElementById('scroll-container')
-    if (!container) return
-    const onScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container
-      const total = scrollHeight - clientHeight
-      const pct = total > 0 ? scrollTop / total : 0
-      setProgress(pct)
-      spring.set(pct)
-    }
-    container.addEventListener('scroll', onScroll, { passive: true })
-    return () => container.removeEventListener('scroll', onScroll)
-  }, [spring])
+  useGSAP(() => {
+    gsap.to(bar.current, {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: { start: 0, end: 'max', scrub: 0.3 },
+    })
+  })
 
   return (
-    <div
-      className="fixed top-0 left-0 right-0 z-50 h-[2px] pointer-events-none"
-      style={{ background: 'rgba(59,130,246,0.12)' }}
-    >
-      <motion.div
-        className="h-full origin-left"
-        style={{
-          scaleX: spring,
-          background: 'linear-gradient(to right, #3B82F6, #6366F1)',
-          boxShadow: '0 0 8px rgba(99,102,241,0.7)',
-        }}
-      />
+    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px]">
+      <div ref={bar} className="h-full origin-left bg-accent" style={{ transform: 'scaleX(0)' }} />
     </div>
   )
 }

@@ -1,364 +1,334 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useRef, useState } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Smartphone } from 'lucide-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { SiGithub } from 'react-icons/si'
+import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { mobileApps as projects, tx, linkText, websiteOf } from '@/data/projects'
+import { RollText } from './ui/RollText'
+import { SectionLabel } from './ui/SectionLabel'
+import { RevealChars, SplitChars } from './ui/Split'
+import { Magnetic } from './ui/Magnetic'
+import ProjectSheet from './ProjectSheet'
+import { Bolubi, type BolubiApi } from './ui/Bolubi'
 
-const projects = [
-  {
-    key: 'temanku' as const,
-    color: '#10B981',
-    dim: '#064e3b',
-    github: 'https://github.com/diopratama99/TemanKu',
-    screenshots: [
-      '/screenshots/temanku/1_dashboard.png',
-      '/screenshots/temanku/2_statistik_ringkasan.png',
-      '/screenshots/temanku/3_statistik_detail.png',
-      '/screenshots/temanku/4_add_transaction.png',
-      '/screenshots/temanku/5_budgeting.png',
-      '/screenshots/temanku/6_analisa_tren_keuangan.png',
-      '/screenshots/temanku/7_perbandingan_bulanan.png',
-      '/screenshots/temanku/8_tabungan.png',
-    ],
-  },
-  {
-    key: 'bensinku' as const,
-    color: '#0EA5E9',
-    dim: '#0c4a6e',
-    github: 'https://github.com/diopratama99/BensinKu',
-    screenshots: [
-      '/screenshots/bensinku/Screenshot_20260414-142803.png',
-      '/screenshots/bensinku/Screenshot_20260414-142821.png',
-      '/screenshots/bensinku/Screenshot_20260414-142826.png',
-      '/screenshots/bensinku/Screenshot_20260414-142830.png',
-      '/screenshots/bensinku/Screenshot_20260414-142834.png',
-      '/screenshots/bensinku/Screenshot_20260414-142843.png',
-      '/screenshots/bensinku/Screenshot_20260414-142858.png',
-      '/screenshots/bensinku/Screenshot_20260414-142906.png',
-      '/screenshots/bensinku/Screenshot_20260414-142913.png',
-      '/screenshots/bensinku/Screenshot_20260414-142923.png',
-      '/screenshots/bensinku/Screenshot_20260414-143316.png',
-    ],
-  },
-]
+const GITHUB = 'https://github.com/diopratama99'
 
-/* ─── Full Gallery Modal ─── */
-function GalleryModal({ screenshots, initialIndex = 0, onClose }: {
-  screenshots: string[]
-  initialIndex?: number
-  onClose: () => void
-}) {
-  const [idx, setIdx] = useState(initialIndex)
-  const prev = () => setIdx(i => (i - 1 + screenshots.length) % screenshots.length)
-  const next = () => setIdx(i => (i + 1) % screenshots.length)
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)' }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.88, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.88, opacity: 0 }} transition={{ duration: 0.25 }}
-        className="relative flex flex-col items-center"
-        onClick={e => e.stopPropagation()}
-      >
-        <button onClick={onClose} className="absolute -top-12 right-0 p-2 rounded-full cursor-pointer"
-          style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-          <X size={18} />
-        </button>
-        <div className="relative" style={{ width: 280, height: 560 }}>
-          <Image src={screenshots[idx]} alt={`ss-${idx}`} fill className="object-contain rounded-2xl" sizes="280px" />
-        </div>
-        <div className="flex items-center gap-6 mt-4">
-          <button onClick={prev} className="p-3 rounded-full cursor-pointer" style={{ background: 'rgba(59,130,246,0.2)', color: '#60A5FA' }}>
-            <ChevronLeft size={20} />
-          </button>
-          <span className="text-sm tabular-nums" style={{ color: 'rgba(255,255,255,0.45)' }}>{idx + 1} / {screenshots.length}</span>
-          <button onClick={next} className="p-3 rounded-full cursor-pointer" style={{ background: 'rgba(59,130,246,0.2)', color: '#60A5FA' }}>
-            <ChevronRight size={20} />
-          </button>
-        </div>
-        <div className="flex gap-1.5 mt-3">
-          {screenshots.map((_, i) => (
-            <button key={i} onClick={() => setIdx(i)} className="rounded-full transition-all cursor-pointer"
-              style={{ width: i === idx ? 20 : 6, height: 6, background: i === idx ? '#3B82F6' : 'rgba(255,255,255,0.2)' }} />
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-/* ─── Main ─── */
 export default function Projects() {
-  const { t } = useLanguage()
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: false, margin: '-80px' })
+  const { t, lang } = useLanguage()
+  const root = useRef<HTMLElement>(null)
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [line, setLine] = useState(0)
+  const bolubi = useRef<BolubiApi | null>(null)
 
-  const [current, setCurrent] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const [gallery, setGallery] = useState<{ screenshots: string[]; index: number } | null>(null)
-  const [paused, setPaused] = useState(false)
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return
+      const section = root.current!
+      const panels = gsap.utils.toArray<HTMLElement>('.pj-panel')
+      const mm = gsap.matchMedia()
 
-  const go = useCallback((dir: number) => {
-    setDirection(dir)
-    setCurrent(c => (c + dir + projects.length) % projects.length)
-  }, [])
+      // Desktop: pin the section and translate the track sideways
+      mm.add('(min-width: 768px)', () => {
+        const track = section.querySelector<HTMLElement>('.pj-track')!
+        const distance = () => track.scrollWidth - window.innerWidth
 
-  useEffect(() => {
-    if (paused || gallery || !inView) return
-    const id = setInterval(() => go(1), 3000)
-    return () => clearInterval(id)
-  }, [paused, gallery, inView, go])
+        const scroll = gsap.to(track, {
+          x: () => -distance(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${distance()}`,
+            pin: true,
+            scrub: true,
+            invalidateOnRefresh: true,
+            refreshPriority: 1,
+          },
+        })
 
-  const slideVariants = {
-    enter: (dir: number) => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit:  (dir: number) => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0 }),
-  }
+        gsap.fromTo(
+          '.pj-progress',
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: true, invalidateOnRefresh: true },
+          },
+        )
 
-  const proj = projects[current]
-  const info = t.projects[proj.key]
+        gsap.to('.pj-hint', { x: 10, duration: 0.8, ease: 'power2.inOut', repeat: -1, yoyo: true })
+
+        // bolubi walks along the progress bar: it's told where to be, and works out its own
+        // pace, steps and braking. Its line changes when a new panel reaches the middle.
+        const walker = section.querySelector<HTMLElement>('.pj-bolubi')!
+        const bar = section.querySelector<HTMLElement>('.pj-bar')!
+        const stops = Array.from(track.children) as HTMLElement[]
+        let current = 0
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          invalidateOnRefresh: true,
+          onRefresh: (self) => bolubi.current?.moveTo(self.progress * (bar.offsetWidth - walker.offsetWidth)),
+          onUpdate: (self) => {
+            bolubi.current?.moveTo(self.progress * (bar.offsetWidth - walker.offsetWidth))
+            // Reference point a bit left of centre, so the intro panel (44vw wide) gets its own line
+            const middle = self.progress * distance() + window.innerWidth * 0.35
+            const idx = Math.max(0, stops.findIndex((p) => middle < p.offsetLeft + p.offsetWidth))
+            if (idx !== current) {
+              current = idx
+              setLine(idx)
+              bolubi.current?.speak()
+            }
+          },
+        })
+
+        panels.forEach((panel) => {
+          const inView = { trigger: panel, containerAnimation: scroll }
+          const cover = panel.querySelector('.pj-cover')
+          const img = panel.querySelector('.pj-img')
+
+          if (cover && img) {
+            gsap.fromTo(
+              cover,
+              { clipPath: 'inset(0% 0% 0% 100%)' },
+              { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { ...inView, start: 'left 95%', end: 'left 45%', scrub: true } },
+            )
+            gsap.fromTo(
+              img,
+              { xPercent: -10, scale: 1.25 },
+              { xPercent: 10, scale: 1.12, ease: 'none', scrollTrigger: { ...inView, start: 'left right', end: 'right left', scrub: true } },
+            )
+          }
+          gsap.from(panel.querySelectorAll('.pj-char'), {
+            yPercent: 115,
+            duration: 1,
+            ease: 'expo.out',
+            stagger: 0.02,
+            scrollTrigger: { ...inView, start: 'left 70%', toggleActions: 'play none none reverse' },
+          })
+          gsap.from(panel.querySelectorAll('.pj-fade'), {
+            y: 30,
+            autoAlpha: 0,
+            duration: 0.9,
+            ease: 'expo.out',
+            stagger: 0.06,
+            scrollTrigger: { ...inView, start: 'left 70%', toggleActions: 'play none none reverse' },
+          })
+        })
+      })
+
+      // Pointer devices: a "View app" pill trails the cursor over each cover, which tilts slightly
+      mm.add('(min-width: 768px) and (pointer: fine)', () => {
+        const cleanups = gsap.utils.toArray<HTMLElement>('.pj-cover').map((cover) => {
+          const pill = cover.querySelector<HTMLElement>('.pj-view')!
+          const x = gsap.quickTo(pill, 'x', { duration: 0.5, ease: 'power3' })
+          const y = gsap.quickTo(pill, 'y', { duration: 0.5, ease: 'power3' })
+          const rx = gsap.quickTo(cover, 'rotationX', { duration: 0.8, ease: 'power3' })
+          const ry = gsap.quickTo(cover, 'rotationY', { duration: 0.8, ease: 'power3' })
+          gsap.set(cover, { transformPerspective: 1200 })
+
+          const move = (e: MouseEvent) => {
+            const r = cover.getBoundingClientRect()
+            const px = e.clientX - r.left
+            const py = e.clientY - r.top
+            x(px - pill.offsetWidth / 2)
+            y(py - pill.offsetHeight / 2)
+            ry((px / r.width - 0.5) * 6)
+            rx(-(py / r.height - 0.5) * 6)
+          }
+          const enter = (e: MouseEvent) => {
+            const r = cover.getBoundingClientRect()
+            gsap.set(pill, { x: e.clientX - r.left - pill.offsetWidth / 2, y: e.clientY - r.top - pill.offsetHeight / 2 })
+            gsap.to(pill, { scale: 1, duration: 0.5, ease: 'back.out(2)', overwrite: 'auto' })
+          }
+          const leave = () => {
+            gsap.to(pill, { scale: 0, duration: 0.35, ease: 'power3.in', overwrite: 'auto' })
+            rx(0)
+            ry(0)
+          }
+          cover.addEventListener('mousemove', move)
+          cover.addEventListener('mouseenter', enter)
+          cover.addEventListener('mouseleave', leave)
+          return () => {
+            cover.removeEventListener('mousemove', move)
+            cover.removeEventListener('mouseenter', enter)
+            cover.removeEventListener('mouseleave', leave)
+          }
+        })
+        return () => cleanups.forEach((fn) => fn())
+      })
+
+      // Mobile: plain vertical reveals
+      mm.add('(max-width: 767px)', () => {
+        panels.forEach((panel) => {
+          gsap.from(panel.querySelectorAll('.pj-cover, .pj-fade'), {
+            y: 50,
+            autoAlpha: 0,
+            duration: 1,
+            ease: 'expo.out',
+            stagger: 0.06,
+            scrollTrigger: { trigger: panel, start: 'top 85%' },
+          })
+        })
+      })
+    },
+    { scope: root },
+  )
 
   return (
-    <section id="projects" className="w-full h-full flex flex-col justify-center overflow-hidden" ref={ref}>
-
-      {/* Section header */}
-      <div className="px-6 md:px-12 lg:px-20 pt-10 pb-4">
-        {/* Section index */}
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center gap-4 mb-5"
-        >
-          <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>05 / PROJECTS</span>
-          <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
-          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>{t.projects.subtitle}</span>
-        </motion.div>
-
-        {/* Big title */}
-        <div className="overflow-hidden mb-1">
-          <motion.h2
-            initial={{ y: '100%' }}
-            animate={inView ? { y: 0 } : { y: '100%' }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="font-display font-bold uppercase leading-none"
-            style={{
-              fontSize: 'clamp(2.2rem, 6vw, 5.5rem)',
-              WebkitTextStroke: '1.5px rgba(226,232,240,0.6)',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            {t.projects.title}
-          </motion.h2>
+    <section id="projects" ref={root} className="relative overflow-hidden">
+      <div className="pj-track flex flex-col md:h-[100svh] md:w-max md:flex-row">
+        {/* Intro panel */}
+        <div className="flex shrink-0 flex-col justify-between gap-10 px-pad pb-12 pt-24 md:h-full md:w-[44vw] md:pb-48 md:pt-28">
+          <SectionLabel index="02" title={t.projects.title} />
+          <RevealChars
+            text={t.projects.selected}
+            className="font-display text-[clamp(3rem,7.5vw,8.5rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em]"
+          />
+          <div className="mt-14 w-20 md:hidden">
+            <Bolubi message={t.projects.bolubi[0]} label={t.projects.bolubiLabel} />
+          </div>
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <p className="font-display text-[clamp(3rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.03em] text-accent-soft">
+                {String(projects.length).padStart(2, '0')}
+              </p>
+              <p className="mt-3 max-w-xs text-muted">{t.projects.subtitle}</p>
+            </div>
+            <p className="label hidden items-center gap-3 md:flex">
+              {t.projects.scrollHint}
+              <ArrowRight size={14} className="pj-hint" />
+            </p>
+          </div>
         </div>
 
-        {/* Horizontal divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full h-px mt-4 origin-left"
-          style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)' }}
+        {/* Project panels */}
+        {projects.map((p, i) => (
+          <article
+            key={p.slug}
+            className="pj-panel flex shrink-0 flex-col justify-center gap-5 px-pad py-10 md:h-full md:w-[min(70vw,76vh)] md:px-0 md:pb-36 md:pl-[3vw] md:pt-24"
+          >
+            <div className="pj-fade label flex items-center justify-between gap-4">
+              <span className="flex items-center gap-3">
+                <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                {String(i + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
+              </span>
+              <span className="truncate">
+                {p.stack.join(' · ')}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setOpenIndex(i)}
+              aria-label={`${t.projects.viewMore}: ${tx(p.title, lang)}`}
+              className="pj-cover group relative block aspect-video w-full overflow-hidden rounded-2xl border border-line bg-ink-2"
+            >
+              <span className="pj-img absolute inset-0 block">
+                <Image
+                  src={p.cover}
+                  alt=""
+                  fill
+                  sizes="(min-width: 768px) 80vw, 100vw"
+                  className="object-cover transition-[filter] duration-700 group-hover:brightness-110"
+                />
+              </span>
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                style={{ background: `linear-gradient(to top, ${p.color}55, transparent 60%)` }}
+              />
+              <span
+                aria-hidden="true"
+                className="pj-view pointer-events-none absolute left-0 top-0 hidden items-center gap-2 rounded-full bg-bone px-5 py-3 text-sm font-medium text-ink md:flex"
+                style={{ transform: 'scale(0)' }}
+              >
+                {t.projects.viewMore}
+                <ArrowUpRight size={15} />
+              </span>
+            </button>
+
+            <div className="flex items-start justify-between gap-6">
+              <div className="min-w-0">
+                <h3 className="font-display text-[clamp(2rem,4vw,4.25rem)] font-bold uppercase leading-[0.9] tracking-[-0.025em]">
+                  <span className="sr-only">{tx(p.title, lang)}</span>
+                  <SplitChars text={tx(p.title, lang)} charClass="pj-char" />
+                </h3>
+                <p className="pj-fade mt-3 line-clamp-2 max-w-2xl text-lg text-bone/80">
+                  {p.story ? (
+                    <>
+                      <span className="text-dim">“</span>
+                      {tx(p.story.hook, lang)}
+                      <span className="text-dim">”</span>
+                    </>
+                  ) : (
+                    tx(p.desc, lang)
+                  )}
+                </p>
+                {websiteOf(p) && (
+                  <a
+                    href={websiteOf(p)!.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pj-fade label mt-3 inline-flex items-center gap-1.5 !text-accent-soft hover:!text-bone"
+                  >
+                    <RollText>{linkText(websiteOf(p)!)}</RollText>
+                    <ArrowUpRight size={12} />
+                  </a>
+                )}
+              </div>
+              <Magnetic className="pj-fade shrink-0">
+                <button
+                  onClick={() => setOpenIndex(i)}
+                  aria-label={`${t.projects.viewMore}: ${tx(p.title, lang)}`}
+                  className="flex h-14 w-14 items-center justify-center rounded-full border border-line-strong transition-colors duration-500 hover:border-transparent hover:bg-bone hover:text-ink md:h-16 md:w-16"
+                >
+                  <ArrowUpRight size={20} />
+                </button>
+              </Magnetic>
+            </div>
+          </article>
+        ))}
+
+        {/* Outro panel */}
+        <div className="pj-panel flex shrink-0 flex-col justify-center px-pad py-20 md:h-full md:w-[40vw] md:pt-28">
+          <p className="pj-fade label">{t.projects.moreDesc}</p>
+          <a
+            href={GITHUB}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-6 flex items-center gap-5 font-display text-[clamp(2.5rem,5vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.03em]"
+          >
+            <span>
+              <span className="sr-only">{t.projects.more}</span>
+              <SplitChars text={t.projects.more} charClass="pj-char" />
+            </span>
+            <span className="pj-fade shrink-0">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-bone text-ink transition-transform duration-500 group-hover:rotate-45 md:h-20 md:w-20">
+                <SiGithub size={26} />
+              </span>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      {/* Horizontal progress */}
+      <div className="pj-bar pointer-events-none absolute inset-x-pad bottom-8 hidden h-px bg-line md:block">
+        <div className="pj-progress h-full origin-left bg-bone" style={{ transform: 'scaleX(0)' }} />
+      </div>
+      <div className="pj-bolubi absolute bottom-8 left-pad z-10 hidden w-24 md:block">
+        <Bolubi
+          message={t.projects.bolubi[Math.min(line, t.projects.bolubi.length - 1)]}
+          bubbleAlign={line >= t.projects.bolubi.length - 2 ? 'right' : 'left'}
+          apiRef={bolubi}
+          label={t.projects.bolubiLabel}
         />
       </div>
 
-      {/* Carousel */}
-      <div
-        className="flex-1 px-6 md:px-12 lg:px-20 overflow-hidden flex flex-col justify-center"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
-        <div className="relative overflow-hidden">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={current}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter" animate="center" exit="exit"
-              transition={{ duration: 0.42, ease: [0.32, 0.72, 0, 1] }}
-            >
-              {/* Card */}
-              <div
-                className="rounded-3xl p-8 md:p-10 flex flex-col md:flex-row gap-10 md:gap-16 items-center"
-                style={{
-                  background: `linear-gradient(135deg, ${proj.dim}55 0%, rgba(11,20,38,0.8) 100%)`,
-                  border: `1px solid ${proj.color}30`,
-                  boxShadow: `0 0 80px ${proj.color}12, inset 0 1px 0 rgba(255,255,255,0.05)`,
-                }}
-              >
-                {/* ── Screenshots ── */}
-                <div className="relative shrink-0 self-center">
-                  {/* Glow blob */}
-                  <div className="absolute inset-0 -m-8 rounded-full blur-3xl opacity-25"
-                    style={{ background: proj.color }} />
-
-                  <div className="relative flex gap-4 items-end">
-                    {proj.screenshots.slice(0, 3).map((src, si) => {
-                      const isCenter = si === 1
-                      return (
-                        <motion.div
-                          key={si}
-                          whileHover={{ y: -10, scale: 1.03 }}
-                          transition={{ duration: 0.22 }}
-                          className="relative cursor-pointer rounded-[20px] overflow-hidden shadow-2xl"
-                          style={{
-                            width: isCenter ? 175 : 145,
-                            height: isCenter ? 350 : 290,
-                            border: `2px solid ${proj.color}40`,
-                            boxShadow: isCenter
-                              ? `0 24px 64px rgba(0,0,0,0.6), 0 0 40px ${proj.color}20`
-                              : `0 16px 40px rgba(0,0,0,0.5)`,
-                            flexShrink: 0,
-                          }}
-                          onClick={() => setGallery({ screenshots: proj.screenshots, index: si })}
-                        >
-                          <Image src={src} alt={`${proj.key}-${si}`} fill className="object-cover" sizes="175px" />
-                          <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
-                            style={{ background: 'rgba(0,0,0,0.35)' }}>
-                            <Smartphone size={28} style={{ color: '#fff' }} />
-                          </div>
-                        </motion.div>
-                      )
-                    })}
-
-                    {/* +N badge */}
-                    {proj.screenshots.length > 3 && (
-                      <div className="absolute -bottom-3 -right-3 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold shadow-lg"
-                        style={{ background: proj.color, color: '#fff', boxShadow: `0 0 20px ${proj.color}60` }}>
-                        +{proj.screenshots.length - 3}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* ── Info ── */}
-                <div className="flex-1 min-w-0">
-                  {/* Project number */}
-                  <p className="text-xs tracking-[0.3em] uppercase mb-4" style={{ color: proj.color + '90' }}>
-                    {String(current + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
-                  </p>
-
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-1 h-10 rounded-full" style={{ background: proj.color, boxShadow: `0 0 12px ${proj.color}` }} />
-                    <h3 className="text-4xl md:text-5xl font-bold" style={{ color: proj.color }}>
-                      {info.name}
-                    </h3>
-                  </div>
-
-                  <p className="text-base font-semibold tracking-wide mb-5" style={{ color: proj.color + 'cc' }}>
-                    {info.tagline}
-                  </p>
-
-                  <p className="text-sm md:text-base leading-relaxed mb-5" style={{ color: 'var(--text-muted)', maxWidth: '480px' }}>
-                    {info.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {info.tags.map(tag => (
-                      <span key={tag} className="px-3 py-1 text-xs font-semibold tracking-wider uppercase"
-                        style={{ background: `${proj.color}15`, border: `1px solid ${proj.color}40`, color: proj.color, borderRadius: '4px' }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Feature highlights */}
-                  <div
-                    className="flex flex-col gap-2 mb-6 pt-5"
-                    style={{ borderTop: `1px solid ${proj.color}20` }}
-                  >
-                    {info.features.map((feat, fi) => (
-                      <div key={fi} className="flex items-center gap-2.5">
-                        <div
-                          className="w-1 h-1 rounded-full shrink-0"
-                          style={{ background: proj.color, boxShadow: `0 0 4px ${proj.color}` }}
-                        />
-                        <span className="text-xs" style={{ color: 'rgba(148,163,184,0.65)' }}>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.04, x: 4 }}
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setGallery({ screenshots: proj.screenshots, index: 0 })}
-                      className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
-                      style={{
-                        background: `${proj.color}20`,
-                        border: `1px solid ${proj.color}50`,
-                        color: proj.color,
-                        borderRadius: '6px',
-                      }}
-                    >
-                      <Smartphone size={16} />
-                      {t.projects.viewMore}
-                    </motion.button>
-
-                    <motion.a
-                      href={proj.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.04, x: 4 }}
-                      whileTap={{ scale: 0.96 }}
-                      className="flex items-center gap-3 px-6 py-3 text-sm font-bold cursor-pointer"
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        color: 'rgba(226,232,240,0.8)',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                      }}
-                    >
-                      <SiGithub size={16} />
-                      GitHub
-                    </motion.a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Carousel nav */}
-        <div className="flex items-center justify-center gap-6 mt-6">
-          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => go(-1)}
-            className="p-3 cursor-pointer"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', borderRadius: '6px' }}>
-            <ChevronLeft size={20} />
-          </motion.button>
-
-          <div className="flex gap-2">
-            {projects.map((p, i) => (
-              <button key={i} onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i) }}
-                className="transition-all duration-300 cursor-pointer"
-                style={{ width: i === current ? 32 : 8, height: 4, background: i === current ? p.color : 'rgba(255,255,255,0.15)', borderRadius: '2px' }} />
-            ))}
-          </div>
-
-          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => go(1)}
-            className="p-3 cursor-pointer"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-muted)', borderRadius: '6px' }}>
-            <ChevronRight size={20} />
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Gallery Modal */}
-      <AnimatePresence>
-        {gallery && (
-          <GalleryModal screenshots={gallery.screenshots} initialIndex={gallery.index} onClose={() => setGallery(null)} />
-        )}
-      </AnimatePresence>
+      {openIndex !== null && <ProjectSheet list={projects} index={openIndex} onClose={() => setOpenIndex(null)} />}
     </section>
   )
 }

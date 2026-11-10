@@ -1,175 +1,170 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0B1426;
-  --bg-surface: #112240;
-  --bg-surface2: #1a2f55;
-  --accent: #3B82F6;
-  --accent-light: #60A5FA;
-  --text-primary: #E2E8F0;
-  --text-muted: #94A3B8;
-  --border: rgba(59, 130, 246, 0.2);
+  --ink: #07080b;
+  --ink-2: #0d0f14;
+  --ink-3: #161922;
+  --bone: #eeece6;
+  --muted: #8b909c;
+  --dim: #5a5f6b;
+  --line: rgba(238, 236, 230, 0.1);
+  --line-strong: rgba(238, 236, 230, 0.22);
+  --accent: #5468ff;
+  --accent-soft: #a9b3ff;
+  --pad: clamp(1.25rem, 4vw, 4rem);
+  --ease-expo: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 @theme inline {
-  --color-background: var(--bg-primary);
-  --color-foreground: var(--text-primary);
-  --font-sans: var(--font-mono);
-  --font-mono: var(--font-mono);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-bone: var(--bone);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-display: var(--font-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+  --spacing-pad: var(--pad);
 }
 
 html {
-  scroll-behavior: smooth;
-  height: 100%;
-}
-
-/* Full-page snap scroll container */
-#scroll-container {
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-}
-
-/* Each snappable page */
-.snap-page {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative;
-}
-
-.snap-page::before,
-.snap-page::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 72px;
-  pointer-events: none;
-  z-index: 20;
-}
-
-.snap-page::before {
-  top: 0;
-  background: linear-gradient(to bottom, rgba(11,20,38,0.85) 0%, transparent 100%);
-}
-
-.snap-page::after {
-  bottom: 0;
-  background: linear-gradient(to top, rgba(11,20,38,0.85) 0%, transparent 100%);
+  background: var(--ink);
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-mono), 'JetBrains Mono', 'Courier New', monospace;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: #ffffff;
+  background: var(--accent);
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--ink);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
+  background: var(--dim);
   border-radius: 3px;
 }
 
-.glass {
-  background: rgba(17, 34, 64, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 3px;
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #818CF8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+@layer components {
+  /* Small mono caption used for meta text across the site */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-.glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
-}
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 999px;
+    padding: 0.95rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color 0.4s var(--ease-expo),
+      color 0.4s var(--ease-expo),
+      border-color 0.4s var(--ease-expo);
+  }
+  .btn-primary {
+    background: var(--bone);
+    color: var(--ink);
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-ghost {
+    border: 1px solid var(--line-strong);
+    color: var(--bone);
+  }
+  .btn-ghost:hover {
+    border-color: var(--bone);
+  }
 
-.glow-text {
-  text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
-}
+  .outline-text {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+  }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0.6rem 0;
+    color: var(--bone);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  .field::placeholder {
+    color: var(--dim);
+  }
+  .field:focus {
+    border-bottom-color: var(--bone);
+  }
 
-@keyframes pulse-border {
-  0%, 100% { border-color: rgba(59, 130, 246, 0.3); }
-  50% { border-color: rgba(59, 130, 246, 0.8); }
-}
+  /* Word mask for split-text reveals; padding keeps descenders from being clipped */
+  .mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding: 0.08em 0.04em 0.12em;
+    margin: -0.08em -0.04em -0.12em;
+  }
 
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.float-animation {
-  animation: float 4s ease-in-out infinite;
-}
-
-.font-display {
-  font-family: var(--font-display), 'Space Grotesk', sans-serif;
-}
-
-/* Marquee / infinite scroll */
-@keyframes marquee-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-@keyframes marquee-right {
-  0%   { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-
-.marquee-track-left {
-  display: flex;
-  width: max-content;
-  animation: marquee-left var(--marquee-duration, 30s) linear infinite;
-}
-.marquee-track-right {
-  display: flex;
-  width: max-content;
-  animation: marquee-right var(--marquee-duration, 30s) linear infinite;
-}
-.marquee-row:hover .marquee-track-left,
-.marquee-row:hover .marquee-track-right {
-  animation-play-state: paused;
-}
-
-.section-padding {
-  padding: 5rem 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .section-padding {
-    padding: 6rem 3rem;
+  /* Text roll hover: the label slides up and a copy slides in from below */
+  .roll {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .roll > span {
+    display: block;
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .roll > span + span {
+    position: absolute;
+    inset: 100% 0 auto 0;
+  }
+  @media (hover: hover) {
+    :is(a, button):hover .roll > span {
+      transform: translateY(-100%);
+    }
   }
 }
 
-@media (min-width: 1024px) {
-  .section-padding {
-    padding: 7rem 6rem;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
   }
 }

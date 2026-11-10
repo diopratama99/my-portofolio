@@ -1,283 +1,196 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { ArrowRight, ArrowUpRight, Download } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { ArrowDownRight, ArrowUpRight, Download } from 'lucide-react'
+import { SiFlutter, SiSupabase, SiDart, SiSqlite } from 'react-icons/si'
+import { gsap, useGSAP, prefersReducedMotion, isTouchDevice, scrollToTarget } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import ParticleBackground from './ParticleBackground'
+import { SplitChars } from './ui/Split'
+import { Magnetic } from './ui/Magnetic'
+import { RollText } from './ui/RollText'
+import { LocalClock } from './ui/LocalClock'
+import PhoneShowcase from './PhoneShowcase'
+import { DotField } from './ui/DotField'
 
-export default function Hero() {
+/** The stack, floating around the phone. depth = how far it drifts with the pointer. */
+const ORBIT = [
+  { Icon: SiFlutter, color: '#54C5F8', label: 'Flutter', pos: 'left-[1%] top-[12%]', depth: 26 },
+  { Icon: SiSupabase, color: '#3ECF8E', label: 'Supabase', pos: 'right-[0%] top-[32%]', depth: 42 },
+  { Icon: SiDart, color: '#2BB7F6', label: 'Dart', pos: 'left-[0%] bottom-[36%]', depth: 18 },
+  { Icon: SiSqlite, color: '#6CC3E8', label: 'SQLite', pos: 'right-[4%] bottom-[22%]', depth: 32 },
+]
+
+export default function Hero({ ready }: { ready: boolean }) {
   const { t } = useLanguage()
-  const [roleIndex, setRoleIndex] = useState(0)
-  const [displayText, setDisplayText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
+  const root = useRef<HTMLElement>(null)
+  const intro = useRef<gsap.core.Timeline | null>(null)
+  const [first, ...rest] = t.hero.name.split(' ')
+  const last = rest.join(' ')
+
+  // Intro held until the preloader finishes, plus a gentle parallax on scroll
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+      tl.from('.h-char', { yPercent: 115, duration: 1.4, stagger: 0.04 })
+        .from('.h-phone', { y: 120, rotationX: 25, autoAlpha: 0, duration: 1.8 }, 0.2)
+        .from('.h-fade', { y: 24, autoAlpha: 0, duration: 1, stagger: 0.05 }, 0.5)
+        .from('.h-orbit-in', { scale: 0, autoAlpha: 0, duration: 0.9, ease: 'back.out(2)', stagger: 0.12 }, 1)
+      intro.current = tl
+      if (ready) tl.play()
+
+      // Stack chips bob gently, each on its own rhythm
+      gsap.utils.toArray<HTMLElement>('.h-orbit-bob').forEach((el, i) => {
+        gsap.to(el, { y: i % 2 ? 10 : -10, duration: gsap.utils.random(2.2, 3.2), ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.3 })
+      })
+
+      // Letters of the name hop and light up when the pointer brushes them
+      const chars = gsap.utils.toArray<HTMLElement>('.h-char')
+      const cleanups = chars.map((ch) => {
+        const enter = () => {
+          gsap
+            .timeline()
+            .to(ch, { yPercent: -9, color: '#a9b3ff', duration: 0.18, ease: 'power2.out', overwrite: 'auto' })
+            .to(ch, { yPercent: 0, duration: 0.7, ease: 'elastic.out(1, 0.35)' })
+            .to(ch, { color: '#eeece6', duration: 0.8 }, '<0.25')
+        }
+        ch.addEventListener('mouseenter', enter)
+        return () => ch.removeEventListener('mouseenter', enter)
+      })
+
+      // Chips drift with the pointer at different depths
+      let onMove: ((e: MouseEvent) => void) | null = null
+      if (!isTouchDevice()) {
+        const orbit = gsap.utils.toArray<HTMLElement>('.h-orbit').map((el) => ({
+          depth: Number(el.dataset.depth),
+          x: gsap.quickTo(el, 'x', { duration: 1.2, ease: 'power3' }),
+          y: gsap.quickTo(el, 'y', { duration: 1.2, ease: 'power3' }),
+        }))
+        onMove = (e: MouseEvent) => {
+          const mx = e.clientX / window.innerWidth - 0.5
+          const my = e.clientY / window.innerHeight - 0.5
+          orbit.forEach((o) => {
+            o.x(mx * o.depth)
+            o.y(my * o.depth * 0.6)
+          })
+        }
+        window.addEventListener('mousemove', onMove)
+      }
+
+      const out = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true }
+      gsap.to('.h-copy', { yPercent: -12, autoAlpha: 0.2, ease: 'none', scrollTrigger: out })
+      gsap.to('.h-phone-wrap', { yPercent: 18, ease: 'none', scrollTrigger: out })
+
+      return () => {
+        cleanups.forEach((fn) => fn())
+        if (onMove) window.removeEventListener('mousemove', onMove)
+      }
+    },
+    { scope: root },
+  )
 
   useEffect(() => {
-    const roles = t.hero.roles
-    const current = roles[roleIndex]
-    const speed = isDeleting ? 60 : 100
-
-    const timeout = setTimeout(() => {
-      if (!isDeleting && displayText === current) {
-        setTimeout(() => setIsDeleting(true), 1200)
-        return
-      }
-      if (isDeleting && displayText === '') {
-        setIsDeleting(false)
-        setRoleIndex((i) => (i + 1) % roles.length)
-        return
-      }
-      setDisplayText((prev) =>
-        isDeleting ? prev.slice(0, -1) : current.slice(0, prev.length + 1)
-      )
-    }, speed)
-
-    return () => clearTimeout(timeout)
-  }, [displayText, isDeleting, roleIndex, t.hero.roles])
+    if (ready) intro.current?.play()
+  }, [ready])
 
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden"
+      ref={root}
+      className="relative flex min-h-[100svh] flex-col overflow-hidden px-pad pb-6 pt-24 md:pt-28"
     >
-      <ParticleBackground />
-
-      {/* Bottom fade */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-48 z-10"
-        style={{
-          background: 'linear-gradient(to bottom, transparent, var(--bg-primary))',
-        }}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse 50% 55% at 78% 50%, rgba(84,104,255,0.14), transparent 70%)' }}
       />
-
-      {/* Corner index — brutalist accent */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.3 }}
-        className="absolute top-8 right-6 md:right-12 lg:right-20 z-10 font-mono text-xs tracking-widest select-none"
-        style={{ color: 'rgba(59,130,246,0.35)' }}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{ maskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, #000 30%, transparent 85%)' }}
       >
-        01 / PORTFOLIO
-      </motion.div>
-
-      {/* Main content */}
-      <div className="relative z-10 w-full px-6 md:px-12 lg:px-20 pt-24 pb-16">
-
-        {/* Status badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex items-center gap-4 mb-10"
-        >
-          <div
-            className="h-px w-12"
-            style={{ background: 'rgba(59,130,246,0.5)' }}
-          />
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
-            style={{
-              background: 'rgba(16,185,129,0.08)',
-              border: '1px solid rgba(16,185,129,0.3)',
-              color: '#34D399',
-              borderRadius: '4px',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: '#10B981', boxShadow: '0 0 6px #10B981' }}
-            />
-            Available for Work
-          </div>
-        </motion.div>
-
-        {/* Giant name — 1 line: "Dio" outline + "Pratama" gradient */}
-        <div className="overflow-hidden leading-none">
-          <motion.h1
-            initial={{ y: '105%' }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-            className="font-display font-bold uppercase leading-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(2.4rem, 7.5vw, 8.5rem)', letterSpacing: '-0.02em' }}
-          >
-            <span style={{
-              WebkitTextStroke: '2px rgba(226,232,240,0.75)',
-              WebkitTextFillColor: 'transparent',
-            }}>Dio&nbsp;</span>
-            <span style={{
-              background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 45%, #818CF8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>Pratama</span>
-          </motion.h1>
-        </div>
-
-        {/* Horizontal divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full h-px mt-8 mb-8 origin-left"
-          style={{
-            background:
-              'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.4), transparent)',
-          }}
-        />
-
-        {/* Bottom row: role (left) + CTAs (right) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
-          className="flex flex-col md:flex-row md:items-center md:justify-between gap-8"
-        >
-          {/* Typewriter role */}
-          <div className="flex flex-col gap-1.5">
-            <span
-              className="text-xs tracking-widest uppercase font-medium"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {t.hero.greeting}
-            </span>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-6 h-px flex-shrink-0"
-                style={{ background: 'rgba(59,130,246,0.6)' }}
-              />
-              <span
-                className="text-xl md:text-2xl font-mono font-medium"
-                style={{ color: 'var(--accent-light)' }}
-              >
-                {displayText}
-                <span className="animate-pulse ml-0.5" style={{ color: 'var(--accent)' }}>
-                  |
-                </span>
-              </span>
-            </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() =>
-                document.getElementById('scroll-container')?.scrollTo({
-                  top: 4 * window.innerHeight,
-                  behavior: 'smooth',
-                })
-              }
-              className="flex items-center gap-2 px-7 py-3 font-semibold text-white cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
-                boxShadow: '0 0 28px rgba(59,130,246,0.4)',
-                borderRadius: '6px',
-              }}
-            >
-              {t.hero.cta}
-              <ArrowRight size={16} />
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() =>
-                document.getElementById('scroll-container')?.scrollTo({
-                  top: 5 * window.innerHeight,
-                  behavior: 'smooth',
-                })
-              }
-              className="flex items-center gap-2 px-7 py-3 font-semibold cursor-pointer"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(59,130,246,0.45)',
-                color: 'var(--accent-light)',
-                borderRadius: '6px',
-              }}
-            >
-              {t.hero.ctaSecondary}
-              <ArrowUpRight size={16} />
-            </motion.button>
-
-            <motion.a
-              href="/cv-dio-pratama.pdf"
-              download
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-2 px-7 py-3 font-semibold cursor-pointer"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(148,163,184,0.2)',
-                color: 'rgba(148,163,184,0.6)',
-                textDecoration: 'none',
-                borderRadius: '6px',
-              }}
-            >
-              <Download size={15} />
-              {t.hero.downloadCv}
-            </motion.a>
-          </div>
-        </motion.div>
-
-        {/* Tech stack badges */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-          className="flex flex-wrap items-center gap-2 mt-10"
-        >
-          {['Flutter', 'React', 'Laravel', 'Python', 'Three.js'].map((tech, i) => (
-            <motion.span
-              key={tech}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 + i * 0.07 }}
-              className="px-3 py-1 text-xs font-medium tracking-widest uppercase"
-              style={{
-                background: 'rgba(17,34,64,0.55)',
-                border: '1px solid rgba(59,130,246,0.18)',
-                color: 'var(--text-muted)',
-                borderRadius: '4px',
-              }}
-            >
-              {tech}
-            </motion.span>
-          ))}
-        </motion.div>
+        <DotField />
       </div>
 
-      {/* Scroll indicator — vertical line on right */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        className="absolute bottom-10 right-6 md:right-12 lg:right-20 flex flex-col items-center gap-2 cursor-pointer z-10"
-        onClick={() =>
-          document.getElementById('scroll-container')?.scrollTo({
-            top: 1 * window.innerHeight,
-            behavior: 'smooth',
-          })
-        }
-      >
-        <span
-          className="text-xs tracking-widest uppercase"
-          style={{
-            color: 'var(--text-muted)',
-            writingMode: 'vertical-rl',
-            letterSpacing: '0.18em',
-          }}
-        >
-          {t.hero.scrollDown}
+      <div className="label relative grid grid-cols-2 items-start gap-4 md:grid-cols-3">
+        <span className="h-fade">{t.hero.basedIn}</span>
+        <span className="h-fade hidden justify-self-center md:block">
+          <LocalClock />
         </span>
-        <motion.div
-          animate={{ scaleY: [0.4, 1, 0.4] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-px h-14 origin-bottom"
-          style={{ background: 'linear-gradient(to bottom, var(--accent), transparent)' }}
-        />
-      </motion.div>
+        <span className="h-fade flex items-center gap-2 justify-self-end text-bone">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          {t.hero.available}
+        </span>
+      </div>
+
+      <div className="relative grid flex-1 items-center gap-14 py-10 md:grid-cols-12 md:gap-8">
+        <div className="h-copy md:col-span-7 lg:col-span-8">
+          <h1
+            className="font-display font-bold uppercase leading-[0.82] tracking-[-0.025em]"
+            style={{ fontSize: 'clamp(3.5rem, min(12.5vw, 22vh), 13.5rem)' }}
+          >
+            <span className="sr-only">{t.hero.name}</span>
+            <SplitChars text={first} charClass="h-char" className="block" />
+            <SplitChars text={last} charClass="h-char" className="block" />
+          </h1>
+
+          <p className="h-fade mt-8 max-w-md text-lg leading-snug text-muted md:text-xl">{t.hero.intro}</p>
+
+          <div className="h-fade mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <p className="flex items-center gap-2.5 font-display text-xl font-medium tracking-[-0.02em] md:text-2xl">
+              <SiFlutter className="shrink-0 text-[#54C5F8]" size="0.9em" aria-hidden="true" />
+              {t.hero.role}
+            </p>
+            <p className="flex items-center gap-2 text-muted">
+              <span className="label">{t.hero.backendLabel}</span>
+              <SiSupabase className="shrink-0 text-[#3ECF8E]" size={15} aria-hidden="true" />
+              <span className="text-bone">Supabase</span>
+            </p>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <Magnetic className="h-fade">
+              <button onClick={() => scrollToTarget('#projects')} className="btn btn-primary">
+                <RollText>{t.hero.cta}</RollText>
+                <ArrowDownRight size={16} />
+              </button>
+            </Magnetic>
+            <Magnetic className="h-fade">
+              <button onClick={() => scrollToTarget('#contact')} className="btn btn-ghost">
+                <RollText>{t.hero.ctaSecondary}</RollText>
+                <ArrowUpRight size={16} />
+              </button>
+            </Magnetic>
+            <a href="/cv-dio-pratama.pdf" download className="h-fade btn text-muted hover:text-bone">
+              <Download size={15} />
+              <RollText>{t.hero.downloadCv}</RollText>
+            </a>
+          </div>
+        </div>
+
+        <div className="h-phone-wrap relative flex justify-center md:col-span-5 lg:col-span-4">
+          <div className="h-phone">
+            <PhoneShowcase />
+          </div>
+          {ORBIT.map(({ Icon, color, label, pos, depth }) => (
+            <span key={label} className={`h-orbit pointer-events-none absolute z-10 ${pos}`} data-depth={depth} aria-hidden="true">
+              <span className="h-orbit-bob block">
+                <span className="h-orbit-in flex items-center gap-2 rounded-2xl border border-line-strong bg-ink-2/80 px-3 py-2 text-xs font-medium shadow-xl backdrop-blur-md">
+                  <Icon size={14} style={{ color }} />
+                  {label}
+                </span>
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="label relative mt-6 flex items-center justify-between">
+        <button onClick={() => scrollToTarget('#about')} className="h-fade hover:text-bone">
+          {t.hero.scrollDown} ↓
+        </button>
+        <span className="h-fade">Portfolio ©{new Date().getFullYear()}</span>
+      </div>
     </section>
   )
 }

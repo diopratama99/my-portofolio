@@ -1,255 +1,228 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import Image from 'next/image'
+import { SiFlutter, SiDart, SiSupabase } from 'react-icons/si'
+import { gsap, useGSAP, prefersReducedMotion, isTouchDevice } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import {
-  SiFlutter, SiDart, SiReact, SiLaravel, SiPython, SiPhp,
-  SiSqlite, SiPostgresql, SiMysql, SiSupabase, SiN8N,
-  SiGit, SiLinux, SiTypescript, SiJavascript, SiHtml5,
-  SiCss, SiVscodium, SiGithub, SiFigma, SiNextdotjs, SiThreedotjs,
-  SiTailwindcss, SiNodedotjs, SiDocker,
-} from 'react-icons/si'
-import { FaRobot, FaWindows, FaApple } from 'react-icons/fa'
-import type { IconType } from 'react-icons'
+import { SectionLabel } from './ui/SectionLabel'
+import { RevealChars } from './ui/Split'
+import { toolbox, alsoUsed } from '@/data/skills'
 
-interface Tech {
-  Icon?: IconType
-  customIcon?: React.ReactNode
-  color: string
-  bg?: string   // optional background square (e.g. JS yellow, TS blue)
-  label: string
-}
-
-const rows: {
-  label: { en: string; id: string }
-  dot: string
-  dir: 'left' | 'right'
-  duration: string
-  items: Tech[]
-}[] = [
-  {
-    label: { en: 'Languages', id: 'Bahasa Pemrograman' },
-    dot: '#F7DF1E',
-    dir: 'left',
-    duration: '28s',
-    items: [
-      { Icon: SiJavascript, color: '#000',    bg: '#F7DF1E', label: 'JavaScript' },
-      { Icon: SiTypescript, color: '#fff',    bg: '#3178C6', label: 'TypeScript' },
-      { Icon: SiPhp,        color: '#777BB4', label: 'PHP' },
-      { Icon: SiPython,     color: '#FFD43B', label: 'Python' },
-      { Icon: SiDart,       color: '#0175C2', label: 'Dart' },
-      { Icon: SiHtml5,      color: '#E34F26', label: 'HTML5' },
-      { Icon: SiCss,        color: '#1572B6', label: 'CSS3' },
-    ],
-  },
-  {
-    label: { en: 'Frameworks & Libraries', id: 'Framework & Library' },
-    dot: '#61DAFB',
-    dir: 'right',
-    duration: '22s',
-    items: [
-      { Icon: SiNextdotjs,   color: '#E2E8F0', label: 'Next.js' },
-      { Icon: SiReact,       color: '#61DAFB', label: 'React' },
-      { Icon: SiTailwindcss, color: '#06B6D4', label: 'Tailwind CSS' },
-      { Icon: SiNodedotjs,   color: '#339933', label: 'Node.js' },
-      { Icon: SiLaravel,     color: '#FF2D20', label: 'Laravel' },
-      { Icon: SiFlutter,     color: '#54C5F8', label: 'Flutter' },
-      { Icon: SiThreedotjs,  color: '#6D6D6D', label: 'Three.js' },
-    ],
-  },
-  {
-    label: { en: 'Databases', id: 'Database' },
-    dot: '#3ECF8E',
-    dir: 'left',
-    duration: '24s',
-    items: [
-      { Icon: SiMysql,      color: '#4479A1', label: 'MySQL' },
-      { Icon: SiPostgresql, color: '#336791', label: 'PostgreSQL' },
-      { Icon: SiSqlite,     color: '#44A6CF', label: 'SQLite' },
-      { Icon: SiSupabase,   color: '#3ECF8E', label: 'Supabase' },
-    ],
-  },
-  {
-    label: { en: 'AI, Automation & Tools', id: 'AI, Otomasi & Tools' },
-    dot: '#A78BFA',
-    dir: 'right',
-    duration: '30s',
-    items: [
-      { Icon: SiN8N,      color: '#EA4B71', label: 'n8n' },
-      { Icon: FaRobot,    color: '#A78BFA', label: 'OpenClaw' },
-      { Icon: SiDocker,   color: '#2496ED', label: 'Docker' },
-      { Icon: SiGit,      color: '#F05032', label: 'Git' },
-      { Icon: SiGithub,   color: '#E6EDF3', label: 'GitHub' },
-      { Icon: SiFigma,    color: '#F24E1E', label: 'Figma' },
-      {
-        customIcon: (
-          <img src="/visio.svg" alt="Visio" width={64} height={64} style={{ flexShrink: 0 }} />
-        ),
-        color: '#2B7CD3',
-        label: 'Visio',
-      },
-      { Icon: SiLinux,   color: '#FCC624', label: 'Linux' },
-      { Icon: FaWindows, color: '#0078D4', label: 'Windows' },
-      { Icon: FaApple,   color: '#A2AAAD', label: 'macOS' },
-      { Icon: SiVscodium,color: '#2B82D9', label: 'VS Code' },
-    ],
-  },
+/** One real app screen per capability, in the same order as t.skills.capabilities. */
+const PREVIEWS = [
+  '/works/temanku/screens/beranda.webp', // custom UI
+  '/works/bensinku/screens/beranda.webp', // Supabase backend
+  '/works/temanku/screens/transaksi.webp', // offline data
+  '/works/temanku/screens/analisa.webp', // charts
+  '/works/bensinku/screens/perjalanan.webp', // GPS
+  '/works/ingatanku/screens/asisten.webp', // AI
 ]
 
-function IconItem({ tech }: { tech: Tech }) {
-  const { Icon, customIcon, color, bg, label } = tech
+export default function Skills() {
+  const { t } = useLanguage()
+  const root = useRef<HTMLElement>(null)
+  const active = useRef(-1)
+  const previewTo = useRef<{ x: (v: number) => void; y: (v: number) => void } | null>(null)
+
+  // Preview follows the pointer within the section
+  useGSAP(
+    () => {
+      if (isTouchDevice() || prefersReducedMotion()) return
+      const section = root.current!
+      const preview = section.querySelector<HTMLElement>('.sk-preview')!
+      const x = gsap.quickTo(preview, 'x', { duration: 0.7, ease: 'power3' })
+      const y = gsap.quickTo(preview, 'y', { duration: 0.7, ease: 'power3' })
+      previewTo.current = { x, y }
+      const onMove = (e: MouseEvent) => {
+        const r = section.getBoundingClientRect()
+        x(e.clientX - r.left - preview.offsetWidth / 2)
+        y(e.clientY - r.top - preview.offsetHeight / 2)
+      }
+      section.addEventListener('mousemove', onMove)
+      return () => section.removeEventListener('mousemove', onMove)
+    },
+    { scope: root },
+  )
+
+  const showPreview = (i: number) => {
+    if (!previewTo.current || i === active.current) return
+    const preview = root.current!.querySelector('.sk-preview')
+    const imgs = root.current!.querySelectorAll('.sk-preview-img')
+    if (i < 0) {
+      gsap.to(preview, { scale: 0, opacity: 0, rotate: -8, duration: 0.5, ease: 'expo.out', overwrite: 'auto' })
+    } else {
+      if (active.current < 0) gsap.to(preview, { scale: 1, opacity: 1, rotate: 0, duration: 0.7, ease: 'expo.out', overwrite: 'auto' })
+      imgs.forEach((img, j) => gsap.to(img, { opacity: j === i ? 1 : 0, duration: 0.35, overwrite: 'auto' }))
+    }
+    active.current = i
+  }
+
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return
+      gsap.from('.sk-lead', {
+        y: 40,
+        autoAlpha: 0,
+        duration: 1.1,
+        ease: 'expo.out',
+        stagger: 0.08,
+        scrollTrigger: { trigger: '.sk-grid', start: 'top 80%' },
+      })
+      gsap.utils.toArray<HTMLElement>('.sk-cap').forEach((row) => {
+        gsap
+          .timeline({ scrollTrigger: { trigger: row, start: 'top 90%' } })
+          .from(row.querySelector('.sk-cap-line'), { scaleX: 0, transformOrigin: 'left center', duration: 1.1, ease: 'expo.inOut' })
+          .from(row.querySelectorAll('.sk-cap-cell'), { y: 24, autoAlpha: 0, duration: 0.9, ease: 'expo.out', stagger: 0.06 }, 0.25)
+      })
+      // Toolbox: chips drop in from above in a random order and bounce as they land
+      gsap.from('.sk-tool', {
+        y: -70,
+        rotation: () => gsap.utils.random(-18, 18),
+        autoAlpha: 0,
+        duration: 1.1,
+        ease: 'bounce.out',
+        stagger: { each: 0.07, from: 'random' },
+        scrollTrigger: { trigger: '.sk-toolbox', start: 'top 85%' },
+      })
+      gsap.from('.sk-chip', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.8,
+        ease: 'expo.out',
+        delay: 0.6,
+        scrollTrigger: { trigger: '.sk-toolbox', start: 'top 85%' },
+      })
+    },
+    { scope: root },
+  )
+
+  // Dock magnification: each chip grows and lifts the closer the pointer is
+  useGSAP(
+    () => {
+      if (isTouchDevice() || prefersReducedMotion()) return
+      const dock = root.current!.querySelector<HTMLElement>('.sk-dock')!
+      const items = Array.from(dock.querySelectorAll<HTMLElement>('.sk-dock-item')).map((el) => {
+        // quickTo can't drive the combined `scale`, so scaleX and scaleY move together
+        const sx = gsap.quickTo(el, 'scaleX', { duration: 0.35, ease: 'power3' })
+        const sy = gsap.quickTo(el, 'scaleY', { duration: 0.35, ease: 'power3' })
+        return {
+          el,
+          scale: (v: number) => (sx(v), sy(v)),
+          y: gsap.quickTo(el, 'y', { duration: 0.35, ease: 'power3' }),
+        }
+      })
+      const move = (e: MouseEvent) => {
+        items.forEach(({ el, scale, y }) => {
+          const r = el.getBoundingClientRect()
+          // Rows count for more than columns, so only the row under the pointer swells
+          const d = Math.hypot(e.clientX - (r.left + r.width / 2), (e.clientY - (r.top + r.height / 2)) * 1.8)
+          const f = Math.max(0, 1 - d / 170)
+          scale(1 + 0.3 * f * f)
+          y(-14 * f)
+        })
+      }
+      const leave = () => items.forEach(({ scale, y }) => (scale(1), y(0)))
+      dock.addEventListener('mousemove', move)
+      dock.addEventListener('mouseleave', leave)
+      return () => {
+        dock.removeEventListener('mousemove', move)
+        dock.removeEventListener('mouseleave', leave)
+      }
+    },
+    { scope: root },
+  )
+
   return (
-    <motion.div
-      whileHover={{ scale: 1.15, y: -4 }}
-      transition={{ duration: 0.18 }}
-      className="flex items-center justify-center mx-5 cursor-default"
-      title={label}
-      style={{ flexShrink: 0 }}
-    >
-      {customIcon ? customIcon : bg && Icon ? (
+    <section id="skills" ref={root} className="relative bg-ink-2 px-pad py-[clamp(6rem,12vw,10rem)]">
+      <SectionLabel index="04" title={t.nav.skills} note={t.skills.subtitle} />
+      <RevealChars
+        text={t.skills.title}
+        className="mt-10 font-display text-[clamp(2.75rem,8.5vw,8.5rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em]"
+      />
+
+      <div className="sk-grid mt-16 grid gap-14 md:mt-24 md:grid-cols-12">
+        <div className="md:col-span-4">
+          <div className="sk-lead flex items-center gap-4">
+            <SiFlutter size={48} className="text-[#54C5F8]" aria-hidden="true" />
+            <SiDart size={42} className="text-[#0175C2]" aria-hidden="true" />
+            <span className="text-2xl text-dim">+</span>
+            <SiSupabase size={42} className="text-[#3ECF8E]" aria-hidden="true" />
+          </div>
+          <p className="sk-lead mt-6 font-display text-3xl font-medium tracking-[-0.03em]">Flutter, Dart & Supabase</p>
+          <p className="sk-lead mt-4 leading-relaxed text-muted">{t.skills.lead}</p>
+        </div>
+
+        <div className="md:col-span-7 md:col-start-6">
+          <p className="label mb-4 flex justify-between gap-4">
+            {t.skills.capabilitiesTitle}
+            <span className="hidden text-dim md:inline">{t.skills.hoverHint}</span>
+          </p>
+          <ol onMouseLeave={() => showPreview(-1)}>
+            {t.skills.capabilities.map((c, i) => (
+              <li
+                key={c.title}
+                onMouseEnter={() => showPreview(i)}
+                className="sk-cap group relative grid gap-2 py-6 sm:grid-cols-[3rem_14rem_1fr] sm:gap-6"
+              >
+                <span className="sk-cap-line absolute inset-x-0 top-0 h-px bg-line-strong" />
+                <span className="sk-cap-cell label pt-1 tabular-nums transition-colors duration-300 group-hover:!text-accent-soft">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="sk-cap-cell text-lg font-medium text-bone">
+                  {/* Hover nudge lives on an inner span so its CSS transition never fights GSAP's transform */}
+                  <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-x-2">
+                    {c.title}
+                  </span>
+                </span>
+                <span className="sk-cap-cell leading-relaxed text-muted transition-colors duration-300 group-hover:text-bone/80">
+                  {c.desc}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Floating app screen that follows the pointer over the capability list */}
         <div
+          aria-hidden="true"
+          className="sk-preview pointer-events-none absolute left-0 top-0 z-20 hidden w-40 md:block lg:w-48"
           style={{
-            width: 64, height: 64, background: bg, borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            aspectRatio: '560 / 1124',
+            transform: 'scale(0)',
+            opacity: 0,
+            filter: 'drop-shadow(0 24px 40px rgba(0,0,0,0.6))',
           }}
         >
-          <Icon size={42} style={{ color }} />
-        </div>
-      ) : Icon ? (
-        <Icon size={64} style={{ color }} />
-      ) : null}
-    </motion.div>
-  )
-}
-
-interface RowProps {
-  label: string
-  dot: string
-  dir: 'left' | 'right'
-  duration: string
-  items: Tech[]
-  delay: number
-  inView: boolean
-}
-
-function IconRow({ label, dot, dir, duration, items, delay, inView }: RowProps) {
-  // Pad to at least 20 unique items so each half covers any screen width (~2080px at 104px/icon)
-  const MIN = 20
-  const padded: Tech[] = []
-  while (padded.length < MIN) padded.push(...items)
-  const doubled = [...padded, ...padded]
-  const trackClass = dir === 'left' ? 'marquee-track-left' : 'marquee-track-right'
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.45, delay }}
-      className="flex flex-col gap-3"
-    >
-      {/* Category label */}
-      <div className="flex items-center gap-2 px-6">
-        <span
-          className="w-1.5 h-1.5 rounded-full inline-block"
-          style={{ background: dot, boxShadow: `0 0 6px ${dot}` }}
-        />
-        <span
-          className="text-[10px] tracking-[0.25em] uppercase font-semibold"
-          style={{ color: 'rgba(148,163,184,0.6)' }}
-        >
-          {label}
-        </span>
-      </div>
-
-      {/* Marquee strip */}
-      <div
-        className="overflow-hidden marquee-row py-1"
-        style={{
-          maskImage:
-            'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-        }}
-      >
-        <div
-          className={trackClass}
-          style={{ '--marquee-duration': duration } as React.CSSProperties}
-        >
-          {doubled.map((tech, i) => (
-            <IconItem key={`${tech.label}-${i}`} tech={tech} />
+          {PREVIEWS.map((src, i) => (
+            <Image key={src} src={src} alt="" fill sizes="200px" className="sk-preview-img object-contain" style={{ opacity: i === 0 ? 1 : 0 }} />
           ))}
         </div>
       </div>
-    </motion.div>
-  )
-}
 
-export default function Skills() {
-  const { t, lang } = useLanguage()
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
-
-  return (
-    <section
-      id="skills"
-      className="w-full h-full flex flex-col justify-center overflow-hidden"
-      style={{ background: 'var(--bg-surface)' }}
-      ref={ref}
-    >
-      {/* Header */}
-      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-8">
-
-        {/* Section index */}
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center gap-4 mb-6"
-        >
-          <span className="font-mono text-xs tracking-widest uppercase" style={{ color: 'rgba(59,130,246,0.4)' }}>04 / SKILLS</span>
-          <div className="h-px flex-1 max-w-16" style={{ background: 'rgba(59,130,246,0.3)' }} />
-          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>{t.skills.subtitle}</span>
-        </motion.div>
-
-        {/* Big title — 1 line */}
-        <div className="overflow-hidden mb-6">
-          <motion.h2
-            initial={{ y: '100%' }}
-            animate={inView ? { y: 0 } : { y: '100%' }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="font-display font-bold uppercase leading-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(2.8rem, 8vw, 7rem)', letterSpacing: '-0.02em' }}
-          >
-            <span style={{ WebkitTextStroke: '1.5px rgba(226,232,240,0.6)', WebkitTextFillColor: 'transparent' }}>Skills&nbsp;</span>
-            <span style={{ background: 'linear-gradient(135deg, #E2E8F0 0%, #60A5FA 45%, #818CF8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>&amp; Stack</span>
-          </motion.h2>
+      <div className="sk-toolbox mt-20 border-t border-line pt-10 md:mt-28">
+        <div className="grid gap-8 md:grid-cols-12">
+          <p className="label md:col-span-3">{t.skills.toolbox}</p>
+          <div className="md:col-span-9">
+            {/* Dock: chips swell toward the pointer like the macOS dock; icons spin on hover */}
+            <ul className="sk-dock flex flex-wrap gap-3 py-3">
+              {toolbox.map(({ Icon, color, label }) => (
+                <li key={label} className="sk-tool">
+                  <span className="sk-dock-item group relative flex items-center gap-2.5 rounded-full border border-line-strong bg-ink-2 px-4 py-2.5 text-sm transition-colors duration-300 hover:z-10 hover:border-bone">
+                    <span className="inline-flex transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:rotate-[360deg]">
+                      <Icon size={16} style={{ color }} aria-hidden="true" />
+                    </span>
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="sk-chip mt-8 text-sm text-dim">
+              <span className="label mr-3">{t.skills.alsoUsed}</span>
+              {alsoUsed.join(' · ')}
+            </p>
+          </div>
         </div>
-
-        {/* Horizontal divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
-          transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full h-px origin-left"
-          style={{ background: 'linear-gradient(to right, rgba(59,130,246,0.7), rgba(99,102,241,0.35), transparent)' }}
-        />
-      </div>
-
-      {/* Marquee rows */}
-      <div className="flex flex-col gap-8 pb-10">
-        {rows.map((row, i) => (
-          <IconRow
-            key={i}
-            label={lang === 'id' ? row.label.id : row.label.en}
-            dot={row.dot}
-            dir={row.dir}
-            duration={row.duration}
-            items={row.items}
-            delay={i * 0.1}
-            inView={inView}
-          />
-        ))}
       </div>
     </section>
   )

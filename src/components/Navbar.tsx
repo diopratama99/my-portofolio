@@ -1,211 +1,220 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Home, User, Briefcase, Zap, FolderOpen, Mail } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { gsap, ScrollTrigger, ScrollSmoother, useGSAP, prefersReducedMotion, scrollToTarget } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
+import type { Language } from '@/data/translations'
+import { RollText } from './ui/RollText'
+import { Magnetic } from './ui/Magnetic'
 
-const navLinks = [
-  { icon: Home,       page: 0, labelEn: 'Home',       labelId: 'Home'       },
-  { icon: User,       page: 1, labelEn: 'About',      labelId: 'Tentang'    },
-  { icon: Briefcase,  page: 2, labelEn: 'Experience', labelId: 'Pengalaman' },
-  { icon: Zap,        page: 3, labelEn: 'Skills',     labelId: 'Keahlian'   },
-  { icon: FolderOpen, page: 4, labelEn: 'Projects',   labelId: 'Proyek'     },
-  { icon: Mail,       page: 5, labelEn: 'Contact',    labelId: 'Kontak'     },
-]
+const SECTIONS = ['hero', 'about', 'projects', 'skills', 'workspace', 'experience', 'contact'] as const
+const LINKS = ['about', 'projects', 'skills', 'workspace', 'experience', 'contact'] as const
+type SectionId = (typeof SECTIONS)[number]
 
-export default function Navbar() {
-  const { lang, setLang } = useLanguage()
-  const [activePage, setActivePage] = useState(0)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [visible, setVisible] = useState(false)
+function LangToggle({
+  lang,
+  setLang,
+  className = '',
+}: {
+  lang: Language
+  setLang: (l: Language) => void
+  className?: string
+}) {
+  return (
+    <div className={`label flex items-center gap-1 ${className}`}>
+      {(['en', 'id'] as const).map((l, i) => (
+        <span key={l} className="flex items-center gap-1">
+          {i > 0 && <span className="text-dim">/</span>}
+          <button
+            onClick={() => setLang(l)}
+            aria-pressed={lang === l}
+            className={`px-1 py-1 transition-colors ${lang === l ? 'text-bone' : 'text-dim hover:text-muted'}`}
+          >
+            {l}
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+export default function Navbar({ ready }: { ready: boolean }) {
+  const { t, lang, setLang } = useLanguage()
+  const root = useRef<HTMLElement>(null)
+  const menuTl = useRef<gsap.core.Timeline | null>(null)
+  const [active, setActive] = useState<SectionId>('hero')
+  const [open, setOpen] = useState(false)
+
+  // Hide on scroll down, track the active section, build the mobile menu timeline
+  useGSAP(
+    () => {
+      const bar = root.current!.querySelector<HTMLElement>('.nv-bar')!
+      let hidden = false
+
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          const y = self.scroll()
+          bar.classList.toggle('is-scrolled', y > 40)
+          const shouldHide = self.direction === 1 && y > window.innerHeight * 0.4
+          if (shouldHide !== hidden) {
+            hidden = shouldHide
+            gsap.to(bar, { yPercent: hidden ? -120 : 0, duration: 0.6, ease: 'expo.out', overwrite: 'auto' })
+          }
+        },
+      })
+
+      SECTIONS.forEach((id) => {
+        const el = document.getElementById(id)
+        if (!el) return
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 45%',
+          end: 'bottom 45%',
+          onToggle: (self) => self.isActive && setActive(id),
+        })
+      })
+
+      const menu = root.current!.querySelector<HTMLElement>('.nv-menu')!
+      menuTl.current = gsap
+        .timeline({
+          paused: true,
+          onStart: () => gsap.set(menu, { visibility: 'visible' }),
+          onReverseComplete: () => gsap.set(menu, { visibility: 'hidden' }),
+        })
+        .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'expo.inOut' })
+        .from('.nv-menu-link', { yPercent: 110, duration: 0.8, ease: 'expo.out', stagger: 0.06 }, '-=0.35')
+        .from('.nv-menu-foot', { autoAlpha: 0, y: 20, duration: 0.5 }, '-=0.5')
+    },
+    { scope: root },
+  )
+
+  // Entrance once the preloader clears
+  useGSAP(
+    () => {
+      if (!ready || prefersReducedMotion()) return
+      gsap.from('.nv-item', { yPercent: -150, autoAlpha: 0, duration: 1.2, ease: 'expo.out', stagger: 0.06, delay: 0.5 })
+    },
+    { scope: root, dependencies: [ready] },
+  )
+
+  // Slide the active pill under the current link
+  useGSAP(
+    () => {
+      const pill = root.current!.querySelector<HTMLElement>('.nv-pill')
+      const link = root.current!.querySelector<HTMLElement>(`[data-link="${active}"]`)
+      if (!pill) return
+      if (!link) {
+        gsap.to(pill, { autoAlpha: 0, duration: 0.3 })
+        return
+      }
+      gsap.to(pill, {
+        x: link.offsetLeft,
+        width: link.offsetWidth,
+        autoAlpha: 1,
+        duration: 0.7,
+        ease: 'expo.out',
+      })
+    },
+    { scope: root, dependencies: [active, lang] },
+  )
 
   useEffect(() => {
-    // brief delay so it slides in after opening screen
-    const t = setTimeout(() => setVisible(true), 100)
-    return () => clearTimeout(t)
-  }, [])
+    if (open) menuTl.current?.play()
+    else menuTl.current?.reverse()
+    ScrollSmoother.get()?.paused(open)
+  }, [open])
 
-  useEffect(() => {
-    const container = document.getElementById('scroll-container')
-    if (!container) return
-    const onScroll = () => {
-      const page = Math.round(container.scrollTop / window.innerHeight)
-      setActivePage(page)
+  const go = (id: SectionId) => {
+    if (open) {
+      setOpen(false)
+      ScrollSmoother.get()?.paused(false)
     }
-    container.addEventListener('scroll', onScroll)
-    return () => container.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const goTo = (page: number) => {
-    setMobileOpen(false)
-    const container = document.getElementById('scroll-container')
-    container?.scrollTo({ top: page * window.innerHeight, behavior: 'smooth' })
+    scrollToTarget(id === 'hero' ? 0 : `#${id}`)
   }
 
   return (
-    <>
-      {/* Floating pill — desktop */}
-      <motion.div
-        initial={{ y: -60, opacity: 0, x: '-50%' }}
-        animate={visible ? { y: 0, opacity: 1, x: '-50%' } : { y: -60, opacity: 0, x: '-50%' }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="fixed top-4 left-1/2 z-40 hidden md:flex"
+    <header ref={root} className="pointer-events-none fixed inset-x-0 top-0 z-50">
+      {/* Mobile fullscreen menu */}
+      <div
+        className="nv-menu pointer-events-auto fixed inset-0 flex flex-col justify-between bg-accent px-pad pb-10 pt-28 md:hidden"
+        style={{ clipPath: 'inset(0% 0% 100% 0%)', visibility: 'hidden' }}
       >
-        <div
-          className="flex items-center gap-1 px-2 py-2 rounded-full"
-          style={{
-            background: 'rgba(11,20,38,0.85)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.1)',
-          }}
-        >
-          {/* Avatar + name */}
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full mr-1"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
-          >
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-              style={{ background: 'linear-gradient(135deg,#3B82F6,#6366F1)' }}
-            >
-              D
-            </div>
-            <span
-              className="text-sm font-semibold tracking-wide"
-              style={{ color: 'rgba(226,232,240,0.85)' }}
-            >
-              Dio Pratama
+        <nav className="flex flex-col gap-1">
+          {LINKS.map((id, i) => (
+            <span key={id} className="mask">
+              <button
+                onClick={() => go(id)}
+                className="nv-menu-link flex items-baseline gap-4 font-display text-[clamp(2.75rem,13vw,4.5rem)] font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white"
+              >
+                <span className="font-mono text-xs font-normal tracking-normal text-white/60">0{i + 1}</span>
+                {t.nav[id]}
+              </button>
             </span>
-          </div>
-
-          {/* Divider */}
-          <div className="w-px h-5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          {/* Nav icons */}
-          {navLinks.map(({ icon: Icon, page, labelEn, labelId }) => {
-            const isActive = activePage === page
-            const label = lang === 'id' ? labelId : labelEn
-            return (
-              <motion.button
-                key={page}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.93 }}
-                onClick={() => goTo(page)}
-                title={label}
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-full cursor-pointer text-xs font-semibold transition-all duration-200"
-                style={
-                  isActive
-                    ? { background: 'rgba(59,130,246,0.2)', color: '#60A5FA', border: '1px solid rgba(59,130,246,0.35)' }
-                    : { color: 'rgba(148,163,184,0.7)', border: '1px solid transparent' }
-                }
-              >
-                <Icon size={14} />
-                {isActive && (
-                  <motion.span
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 'auto', opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden whitespace-nowrap"
-                  >
-                    {label}
-                  </motion.span>
-                )}
-              </motion.button>
-            )
-          })}
-
-          {/* Divider */}
-          <div className="w-px h-5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          {/* Language toggle */}
-          <div
-            className="flex items-center rounded-full p-0.5 gap-0.5"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            {(['en', 'id'] as const).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all"
-                style={
-                  lang === l
-                    ? { background: 'var(--accent)', color: '#fff' }
-                    : { color: 'rgba(148,163,184,0.5)' }
-                }
-              >
-                {l}
-              </button>
-            ))}
-          </div>
+          ))}
+        </nav>
+        <div className="nv-menu-foot flex items-end justify-between text-white">
+          <LangToggle lang={lang} setLang={setLang} className="!text-white" />
+          <span className="label !text-white/70">Dio Pratama ©{new Date().getFullYear()}</span>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Mobile — bottom pill */}
-      <motion.div
-        initial={{ y: 60, opacity: 0, x: '-50%' }}
-        animate={visible ? { y: 0, opacity: 1, x: '-50%' } : { y: 60, opacity: 0, x: '-50%' }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="fixed bottom-4 left-1/2 z-40 flex md:hidden"
-      >
-        <div
-          className="flex items-center gap-0.5 px-2 py-2 rounded-full"
-          style={{
-            background: 'rgba(11,20,38,0.92)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          }}
+      <div className="nv-bar pointer-events-auto relative flex items-center justify-between px-pad py-4 md:grid md:grid-cols-[1fr_auto_1fr] transition-[background-color,backdrop-filter,border-color] duration-500 [&.is-scrolled]:border-b [&.is-scrolled]:border-line [&.is-scrolled]:bg-ink/70 [&.is-scrolled]:backdrop-blur-xl md:py-5">
+        <button
+          onClick={() => go('hero')}
+          className="nv-item flex items-start gap-0.5 justify-self-start font-display text-lg font-semibold tracking-tight"
+          aria-label="Dio Pratama — home"
         >
-          {navLinks.map(({ icon: Icon, page }) => {
-            const isActive = activePage === page
-            return (
-              <button
-                key={page}
-                onClick={() => goTo(page)}
-                className="p-3 rounded-full cursor-pointer transition-all"
-                style={
-                  isActive
-                    ? { background: 'rgba(59,130,246,0.2)', color: '#60A5FA' }
-                    : { color: 'rgba(148,163,184,0.5)' }
-                }
-              >
-                <Icon size={18} />
-              </button>
-            )
-          })}
-          <div className="w-px h-5 mx-0.5" style={{ background: 'rgba(255,255,255,0.1)' }} />
-          {(['en', 'id'] as const).map((l) => (
+          <RollText>Dio Pratama</RollText>
+          <span className="text-xs text-accent-soft">©</span>
+        </button>
+
+        <nav className="relative hidden items-center rounded-full border border-line bg-ink/50 p-1 backdrop-blur-md md:flex">
+          <span
+            aria-hidden="true"
+            className="nv-pill absolute left-0 top-1 h-[calc(100%-0.5rem)] rounded-full bg-bone opacity-0"
+          />
+          {LINKS.map((id) => (
             <button
-              key={l}
-              onClick={() => setLang(l)}
-              className="px-2 py-1 rounded-full text-[10px] font-bold uppercase cursor-pointer transition-all"
-              style={lang === l ? { background: 'var(--accent)', color: '#fff' } : { color: 'rgba(148,163,184,0.4)' }}
+              key={id}
+              data-link={id}
+              onClick={() => go(id)}
+              className={`nv-item relative z-10 rounded-full px-4 py-2 text-sm transition-colors duration-500 ${
+                active === id ? 'text-ink' : 'text-muted hover:text-bone'
+              }`}
             >
-              {l}
+              <RollText>{t.nav[id]}</RollText>
             </button>
           ))}
-        </div>
-      </motion.div>
+        </nav>
 
-      {/* Mobile label tooltip */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 px-4 py-2 rounded-xl text-sm"
-            style={{ background: 'rgba(11,20,38,0.95)', border: '1px solid rgba(255,255,255,0.08)' }}
+        <div className="flex items-center gap-4 md:justify-self-end">
+          <LangToggle lang={lang} setLang={setLang} className="nv-item hidden md:flex" />
+          <div className="hidden md:block">
+            <Magnetic className="nv-item">
+              <button onClick={() => go('contact')} className="btn btn-primary !py-3">
+                <RollText>{t.nav.talk}</RollText>
+              </button>
+            </Magnetic>
+          </div>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="nv-item label flex items-center gap-2 !text-bone md:hidden"
           >
-            Dio Pratama
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+            <span className="relative flex h-3 w-5 flex-col justify-between">
+              <span
+                className={`h-px w-full bg-current transition-transform duration-500 ${open ? 'translate-y-[5.5px] rotate-45' : ''}`}
+              />
+              <span
+                className={`h-px w-full bg-current transition-transform duration-500 ${open ? '-translate-y-[5.5px] -rotate-45' : ''}`}
+              />
+            </span>
+            {open ? t.nav.close : t.nav.menu}
+          </button>
+        </div>
+      </div>
+    </header>
   )
 }

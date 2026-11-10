@@ -5,31 +5,30 @@ import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Analytics } from '@vercel/analytics/react'
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-mono',
+  variable: '--font-jetbrains',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500'],
 })
 
 const spaceGrotesk = Space_Grotesk({
-  variable: '--font-display',
+  variable: '--font-grotesk',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
-  title: 'My Portofolio',
+  title: 'Dio Pratama — Flutter Developer',
   description:
-    'Portofolio Dio Pratama — Web & Mobile Developer, IT Support, CS Student. Passionate about Front-End and Flutter development.',
+    'Portofolio Dio Pratama — Flutter mobile developer building clean, thoughtful apps with Flutter & Supabase.',
   openGraph: {
-    title: 'My Portofolio — Dio Pratama',
-    description:
-      'Web & Mobile Developer passionate about Front-End and Flutter. Building clean, modern apps.',
+    title: 'Dio Pratama — Flutter Developer',
+    description: 'Flutter mobile developer building clean, thoughtful apps.',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'My Portofolio — Dio Pratama',
-    description: 'Web & Mobile Developer passionate about Front-End and Flutter.',
+    title: 'Dio Pratama — Flutter Developer',
+    description: 'Flutter mobile developer building clean, thoughtful apps.',
   },
   icons: {
     icon: '/favicon.svg',
@@ -42,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${jetbrainsMono.variable} ${spaceGrotesk.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}>
+      <body>
         <LanguageProvider>{children}</LanguageProvider>
         <Analytics />
       </body>

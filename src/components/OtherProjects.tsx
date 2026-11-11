@@ -7,11 +7,11 @@ import { SiGithub } from 'react-icons/si'
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { otherProjects, tx, categoryLabel, linkText, websiteOf } from '@/data/projects'
-import { SectionLabel } from './ui/SectionLabel'
 import { RevealChars } from './ui/Split'
 import { Magnetic } from './ui/Magnetic'
 import { RollText } from './ui/RollText'
 import ProjectSheet from './ProjectSheet'
+import { StackIcons } from './ui/StackIcons'
 
 /** Non-Flutter builds, laid out vertically so they read as a separate group from the app carousel. */
 export default function OtherProjects() {
@@ -39,10 +39,9 @@ export default function OtherProjects() {
 
   return (
     <section id="other-projects" ref={root} className="relative px-pad py-[clamp(6rem,12vw,10rem)]">
-      <SectionLabel index="03" title={t.other.title} note={t.other.subtitle} />
       <RevealChars
         text={t.other.heading}
-        className="mt-10 font-display text-[clamp(2.75rem,8vw,8rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em]"
+        className="font-display text-[clamp(2.75rem,8vw,8rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em]"
       />
 
       <div className="mt-14 flex flex-col gap-20 md:mt-20">
@@ -73,10 +72,7 @@ export default function OtherProjects() {
               </button>
 
               <div className="flex flex-col md:col-span-5">
-                <p className="op-fade label flex items-center gap-3">
-                  <span className="rounded-full border border-line-strong px-2.5 py-1 text-bone">{categoryLabel[p.category]}</span>
-                  {p.stack.join(' · ')}
-                </p>
+                <StackIcons className="op-fade" names={[categoryLabel[p.category], ...p.stack]} />
                 <h3 className="op-fade mt-5 font-display text-[clamp(2.25rem,4vw,4rem)] font-bold uppercase leading-[0.9] tracking-[-0.025em]">
                   {tx(p.title, lang)}
                 </h3>
@@ -84,23 +80,15 @@ export default function OtherProjects() {
                 {p.story && (
                   <>
                     <p className="op-fade mt-5 text-xl leading-snug text-bone/90">
-                      <span className="text-dim">“</span>
                       {tx(p.story.hook, lang)}
-                      <span className="text-dim">”</span>
                     </p>
                     <div className="op-fade mt-8 flex flex-col gap-5 border-l border-line-strong pl-5">
                       <div>
-                        <p className="label mb-2 flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                          {t.projects.problem}
-                        </p>
+                        <p className="label mb-2">{t.projects.problem}</p>
                         <p className="leading-relaxed text-muted">{tx(p.story.problem, lang)}</p>
                       </div>
                       <div>
-                        <p className="label mb-2 flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
-                          {t.projects.solution}
-                        </p>
+                        <p className="label mb-2">{t.projects.solution}</p>
                         <p className="leading-relaxed text-bone/85">{tx(p.story.solution, lang)}</p>
                       </div>
                     </div>

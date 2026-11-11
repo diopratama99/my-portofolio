@@ -8,7 +8,6 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { SplitChars } from './ui/Split'
 import { Magnetic } from './ui/Magnetic'
 import { RollText } from './ui/RollText'
-import { LocalClock } from './ui/LocalClock'
 import PhoneShowcase from './PhoneShowcase'
 import { DotField } from './ui/DotField'
 
@@ -112,17 +111,6 @@ export default function Hero({ ready }: { ready: boolean }) {
         <DotField />
       </div>
 
-      <div className="label relative grid grid-cols-2 items-start gap-4 md:grid-cols-3">
-        <span className="h-fade">{t.hero.basedIn}</span>
-        <span className="h-fade hidden justify-self-center md:block">
-          <LocalClock />
-        </span>
-        <span className="h-fade flex items-center gap-2 justify-self-end text-bone">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          {t.hero.available}
-        </span>
-      </div>
-
       <div className="relative grid flex-1 items-center gap-14 py-10 md:grid-cols-12 md:gap-8">
         <div className="h-copy md:col-span-7 lg:col-span-8">
           <h1
@@ -185,12 +173,6 @@ export default function Hero({ ready }: { ready: boolean }) {
         </div>
       </div>
 
-      <div className="label relative mt-6 flex items-center justify-between">
-        <button onClick={() => scrollToTarget('#about')} className="h-fade hover:text-bone">
-          {t.hero.scrollDown} ↓
-        </button>
-        <span className="h-fade">Portfolio ©{new Date().getFullYear()}</span>
-      </div>
     </section>
   )
 }

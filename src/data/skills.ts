@@ -20,7 +20,7 @@ export const toolbox: Tech[] = [
   { Icon: SiPostgresql, color: '#6B9BD1', label: 'PostgreSQL' },
   { Icon: SiSqlite, color: '#44A6CF', label: 'SQLite' },
   { Icon: SiGit, color: '#F05032', label: 'Git' },
-  { Icon: SiGithub, color: '#E6EDF3', label: 'GitHub' },
+  { Icon: SiGithub, color: 'var(--bone)', label: 'GitHub' },
   { Icon: SiFigma, color: '#F24E1E', label: 'Figma' },
   { Icon: VscVscode, color: '#23A9F2', label: 'VS Code' },
 ]

@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { SiFlutter, SiDart, SiSupabase } from 'react-icons/si'
 import { gsap, useGSAP, prefersReducedMotion, isTouchDevice } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { SectionLabel } from './ui/SectionLabel'
 import { RevealChars } from './ui/Split'
 import { toolbox, alsoUsed } from '@/data/skills'
 
@@ -134,11 +133,10 @@ export default function Skills() {
   )
 
   return (
-    <section id="skills" ref={root} className="relative bg-ink-2 px-pad py-[clamp(6rem,12vw,10rem)]">
-      <SectionLabel index="04" title={t.nav.skills} note={t.skills.subtitle} />
+    <section id="skills" ref={root} className="relative px-pad py-[clamp(6rem,12vw,10rem)]">
       <RevealChars
         text={t.skills.title}
-        className="mt-10 font-display text-[clamp(2.75rem,8.5vw,8.5rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em]"
+        className="font-display text-[clamp(2.75rem,8.5vw,8.5rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em]"
       />
 
       <div className="sk-grid mt-16 grid gap-14 md:mt-24 md:grid-cols-12">
@@ -154,21 +152,15 @@ export default function Skills() {
         </div>
 
         <div className="md:col-span-7 md:col-start-6">
-          <p className="label mb-4 flex justify-between gap-4">
-            {t.skills.capabilitiesTitle}
-            <span className="hidden text-dim md:inline">{t.skills.hoverHint}</span>
-          </p>
+          <p className="label mb-4">{t.skills.capabilitiesTitle}</p>
           <ol onMouseLeave={() => showPreview(-1)}>
             {t.skills.capabilities.map((c, i) => (
               <li
                 key={c.title}
                 onMouseEnter={() => showPreview(i)}
-                className="sk-cap group relative grid gap-2 py-6 sm:grid-cols-[3rem_14rem_1fr] sm:gap-6"
+                className="sk-cap group relative grid gap-2 py-6 sm:grid-cols-[14rem_1fr] sm:gap-6"
               >
                 <span className="sk-cap-line absolute inset-x-0 top-0 h-px bg-line-strong" />
-                <span className="sk-cap-cell label pt-1 tabular-nums transition-colors duration-300 group-hover:!text-accent-soft">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
                 <span className="sk-cap-cell text-lg font-medium text-bone">
                   {/* Hover nudge lives on an inner span so its CSS transition never fights GSAP's transform */}
                   <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-x-2">

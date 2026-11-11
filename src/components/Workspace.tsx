@@ -2,11 +2,10 @@
 
 import { useRef, useState } from 'react'
 import Image from 'next/image'
-import { ArrowRight, Server } from 'lucide-react'
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { SectionLabel } from './ui/SectionLabel'
 import { RevealChars } from './ui/Split'
+import { NetworkFlow } from './ui/NetworkFlow'
 
 /** Hotspot positions on /workspace.webp, in percent, matching t.workspace.spots order. */
 const SPOTS: { x: number; y: number; side: 'left' | 'right'; up?: boolean }[] = [
@@ -76,9 +75,7 @@ export default function Workspace() {
 
   return (
     <section id="workspace" ref={root} className="relative px-pad py-[clamp(6rem,12vw,10rem)]">
-      <SectionLabel index="05" title={t.workspace.title} note={t.workspace.subtitle} />
-
-      <div className="ws-head mt-10 grid gap-12 md:grid-cols-12">
+      <div className="ws-head grid gap-12 md:grid-cols-12">
         <div className="md:col-span-6">
           <RevealChars
             text={t.workspace.heading}
@@ -89,17 +86,7 @@ export default function Workspace() {
 
         <div className="ws-flow self-end md:col-span-5 md:col-start-8">
           <p className="ws-fade label mb-4">{t.workspace.flowTitle}</p>
-          <ol className="flex flex-col gap-3">
-            {t.workspace.flow.map((step, i) => (
-              <li key={step} className="ws-step flex items-center gap-4">
-                <span className="label flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line-strong tabular-nums">
-                  {i + 1}
-                </span>
-                <span className={i === 2 ? 'text-[#3ECF8E]' : 'text-bone'}>{step}</span>
-                {i < 2 && <ArrowRight size={14} className="ml-auto shrink-0 text-dim" aria-hidden="true" />}
-              </li>
-            ))}
-          </ol>
+          <NetworkFlow steps={t.workspace.flow} />
         </div>
       </div>
 
@@ -143,10 +130,6 @@ export default function Workspace() {
         ))}
         </div>
 
-        <p className="label pointer-events-none absolute left-4 top-4 rounded-full bg-ink/70 px-3 py-1.5 !text-bone backdrop-blur md:left-6 md:top-6">
-          {t.workspace.hint}
-        </p>
-
         {/* Floating card on larger screens */}
         {spot && active !== null && (
           <div
@@ -164,33 +147,13 @@ export default function Workspace() {
       </div>
 
       {/* On small screens the active spot is described under the photo */}
-      <div className="mt-4 min-h-[7rem] rounded-xl border border-line p-5 md:hidden">
-        {active !== null ? (
-          <div className="ws-card">
+      {active !== null && (
+        <div className="ws-card mt-4 rounded-xl border border-line p-5 md:hidden">
             <p className="font-display text-lg font-medium">{spots[active].title}</p>
             <p className="label mt-1 !text-accent-soft">{spots[active].meta}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted">{spots[active].desc}</p>
           </div>
-        ) : (
-          <p className="label">{t.workspace.hint}</p>
-        )}
-      </div>
-
-      {/* Machines that aren't in the photo */}
-      <div className="mt-12 md:mt-16">
-        <p className="ws-fade label mb-4">{t.workspace.offPhoto}</p>
-        <div className="grid gap-4 md:grid-cols-2">
-          {t.workspace.machines.map((m) => (
-            <div key={m.title} className="ws-fade flex gap-4 rounded-xl border border-line p-5 transition-colors duration-500 hover:border-line-strong hover:bg-ink-2">
-              <Server size={20} className="mt-0.5 shrink-0 text-accent-soft" aria-hidden="true" />
-              <div>
-                <p className="font-display text-lg font-medium">{m.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted">{m.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </section>
   )
 }

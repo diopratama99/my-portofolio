@@ -22,6 +22,8 @@ import { gsap, useGSAP, prefersReducedMotion, isTouchDevice } from '@/lib/gsap'
 
 export type BolubiApi = {
   moveTo: (x: number) => void
+  /** Where it currently is, in px from its starting spot */
+  x: () => number
   hop: () => void
   speak: (ms?: number) => void
 }
@@ -186,6 +188,7 @@ export function Bolubi({
       }
 
       const api: BolubiApi = {
+        x: () => st.x,
         moveTo: (x) => {
           st.targetX = x
           if (!st.placed || reduced) {
@@ -435,9 +438,10 @@ export function Bolubi({
     <div ref={root} className={`relative select-none will-change-transform ${className}`}>
       {message && (
         <div
-          className={`b-bubble pointer-events-none absolute bottom-[calc(100%+4px)] z-10 whitespace-nowrap rounded-2xl bg-bone px-3.5 py-2 text-xs font-medium text-ink shadow-lg ${
+          className={`b-bubble pointer-events-none absolute bottom-[calc(100%+4px)] z-10 rounded-2xl bg-bone px-3.5 py-2 text-xs font-medium text-ink shadow-lg ${
             bubbleAlign === 'left' ? 'left-0 origin-bottom-left' : 'right-0 origin-bottom-right'
           }`}
+          style={{ whiteSpace: 'nowrap' }}
         >
           {message}
           <span

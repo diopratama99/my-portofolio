@@ -6,8 +6,9 @@ import Image from 'next/image'
 import { ArrowRight, ArrowUpRight, X } from 'lucide-react'
 import { gsap, ScrollSmoother, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { tx, categoryLabel, linkText, type Project } from '@/data/projects'
+import { tx, linkText, type Project } from '@/data/projects'
 import { RollText } from './ui/RollText'
+import { StackIcons } from './ui/StackIcons'
 
 export default function ProjectSheet({
   list: projects,
@@ -93,10 +94,7 @@ export default function ProjectSheet({
         <div ref={scroller} className="h-full overflow-y-auto overscroll-contain">
           {/* Sticky header */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-ink/80 px-pad py-4 backdrop-blur-xl">
-            <span className="label flex items-center gap-3">
-              <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-              {String(current + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')} · {categoryLabel[p.category]}
-            </span>
+            <span className="font-display font-medium">{tx(p.title, lang)}</span>
             <button onClick={close} className="ps-close btn btn-ghost !px-4 !py-2.5">
               <X size={14} />
               <RollText>{t.projects.close}</RollText>
@@ -112,27 +110,19 @@ export default function ProjectSheet({
             {p.story && (
               <div className="mt-8 md:mt-12">
                 <p className="ps-in max-w-3xl font-display text-[clamp(1.5rem,3vw,2.5rem)] font-medium leading-tight tracking-[-0.03em]">
-                  <span className="text-dim">“</span>
                   {tx(p.story.hook, lang)}
-                  <span className="text-dim">”</span>
                 </p>
 
                 <div className="relative mt-10 grid gap-4 md:grid-cols-2 md:gap-0">
                   <div className="ps-in rounded-2xl border border-line p-6 md:rounded-r-none md:p-10">
-                    <p className="label mb-4 flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                      {t.projects.problem}
-                    </p>
+                    <p className="label mb-4">{t.projects.problem}</p>
                     <p className="text-lg leading-relaxed text-bone/80">{tx(p.story.problem, lang)}</p>
                   </div>
                   <div
                     className="ps-in rounded-2xl border border-line p-6 md:rounded-l-none md:border-l-0 md:p-10"
                     style={{ background: `${p.color}12` }}
                   >
-                    <p className="label mb-4 flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
-                      {t.projects.solution}
-                    </p>
+                    <p className="label mb-4">{t.projects.solution}</p>
                     <p className="text-lg leading-relaxed text-bone">{tx(p.story.solution, lang)}</p>
                   </div>
                   <span
@@ -153,13 +143,7 @@ export default function ProjectSheet({
               <div className="flex flex-col gap-6 md:col-span-4 md:col-start-9">
                 <div>
                   <p className="label mb-3">{t.projects.stack}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {p.stack.map((s) => (
-                      <span key={s} className="rounded-full border border-line-strong px-3 py-1 text-sm">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
+                  <StackIcons names={p.stack} size={24} />
                 </div>
                 {p.links && (
                   <div className="flex flex-wrap gap-3">
@@ -203,8 +187,7 @@ export default function ProjectSheet({
               <p className="ps-in label md:col-span-3">{t.projects.highlights}</p>
               <ol className="md:col-span-9">
                 {p.features.map((f, i) => (
-                  <li key={i} className="ps-in flex gap-6 border-t border-line py-5 text-lg md:text-xl">
-                    <span className="label pt-1.5 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                  <li key={i} className="ps-in border-t border-line py-5 text-lg md:text-xl">
                     {tx(f, lang)}
                   </li>
                 ))}
@@ -213,9 +196,7 @@ export default function ProjectSheet({
 
             {/* Screens */}
             <div className="mt-16 md:mt-24">
-              <p className="ps-in label mb-6">
-                {t.projects.screens} ({String(p.screens.length).padStart(2, '0')})
-              </p>
+              <p className="ps-in label mb-6">{t.projects.screens}</p>
               <div
                 className={`grid gap-4 md:gap-6 ${
                   isPhone ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5' : 'grid-cols-1 md:grid-cols-2'

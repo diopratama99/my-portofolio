@@ -11,6 +11,9 @@ if (typeof window !== 'undefined') {
 
 export { gsap, ScrollTrigger, ScrollSmoother, useGSAP }
 
+/** Survives client-side navigation: where the home page should land when it remounts. */
+export const navState: { scrollTo: string | null } = { scrollTo: null }
+
 export const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches

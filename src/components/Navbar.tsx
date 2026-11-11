@@ -30,7 +30,7 @@ function LangToggle({
             aria-pressed={lang === l}
             className={`px-1 py-1 transition-colors ${lang === l ? 'text-bone' : 'text-dim hover:text-muted'}`}
           >
-            {l}
+            {l.toUpperCase()}
           </button>
         </span>
       ))}
@@ -142,13 +142,12 @@ export default function Navbar({ ready }: { ready: boolean }) {
         style={{ clipPath: 'inset(0% 0% 100% 0%)', visibility: 'hidden' }}
       >
         <nav className="flex flex-col gap-1">
-          {LINKS.map((id, i) => (
+          {LINKS.map((id) => (
             <span key={id} className="mask">
               <button
                 onClick={() => go(id)}
                 className="nv-menu-link flex items-baseline gap-4 font-display text-[clamp(2.75rem,13vw,4.5rem)] font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white"
               >
-                <span className="font-mono text-xs font-normal tracking-normal text-white/60">0{i + 1}</span>
                 {t.nav[id]}
               </button>
             </span>
@@ -156,18 +155,16 @@ export default function Navbar({ ready }: { ready: boolean }) {
         </nav>
         <div className="nv-menu-foot flex items-end justify-between text-white">
           <LangToggle lang={lang} setLang={setLang} className="!text-white" />
-          <span className="label !text-white/70">Dio Pratama ©{new Date().getFullYear()}</span>
         </div>
       </div>
 
-      <div className="nv-bar pointer-events-auto relative flex items-center justify-between px-pad py-4 md:grid md:grid-cols-[1fr_auto_1fr] transition-[background-color,backdrop-filter,border-color] duration-500 [&.is-scrolled]:border-b [&.is-scrolled]:border-line [&.is-scrolled]:bg-ink/70 [&.is-scrolled]:backdrop-blur-xl md:py-5">
+      <div className="nv-bar theme-tokens pointer-events-auto relative flex items-center justify-between px-pad py-4 md:grid md:grid-cols-[1fr_auto_1fr] transition-[background-color,backdrop-filter,border-color] duration-500 [&.is-scrolled]:border-b [&.is-scrolled]:border-line [&.is-scrolled]:bg-ink/70 [&.is-scrolled]:backdrop-blur-xl md:py-5">
         <button
           onClick={() => go('hero')}
           className="nv-item flex items-start gap-0.5 justify-self-start font-display text-lg font-semibold tracking-tight"
-          aria-label="Dio Pratama — home"
+          aria-label="Dio Pratama, home"
         >
           <RollText>Dio Pratama</RollText>
-          <span className="text-xs text-accent-soft">©</span>
         </button>
 
         <nav className="relative hidden items-center rounded-full border border-line bg-ink/50 p-1 backdrop-blur-md md:flex">

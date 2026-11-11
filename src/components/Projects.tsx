@@ -2,13 +2,12 @@
 
 import { useRef, useState } from 'react'
 import Image from 'next/image'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { SiGithub } from 'react-icons/si'
 import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { mobileApps as projects, tx, linkText, websiteOf } from '@/data/projects'
 import { RollText } from './ui/RollText'
-import { SectionLabel } from './ui/SectionLabel'
 import { RevealChars, SplitChars } from './ui/Split'
 import { Magnetic } from './ui/Magnetic'
 import ProjectSheet from './ProjectSheet'
@@ -59,7 +58,6 @@ export default function Projects() {
           },
         )
 
-        gsap.to('.pj-hint', { x: 10, duration: 0.8, ease: 'power2.inOut', repeat: -1, yoyo: true })
 
         // bolubi walks along the progress bar: it's told where to be, and works out its own
         // pace, steps and braking. Its line changes when a new panel reaches the middle.
@@ -184,26 +182,14 @@ export default function Projects() {
       <div className="pj-track flex flex-col md:h-[100svh] md:w-max md:flex-row">
         {/* Intro panel */}
         <div className="flex shrink-0 flex-col justify-between gap-10 px-pad pb-12 pt-24 md:h-full md:w-[44vw] md:pb-48 md:pt-28">
-          <SectionLabel index="02" title={t.projects.title} />
           <RevealChars
             text={t.projects.selected}
-            className="font-display text-[clamp(3rem,7.5vw,8.5rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em]"
+            className="font-display text-[clamp(3rem,5.6vw,7rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em]"
           />
           <div className="mt-14 w-20 md:hidden">
             <Bolubi message={t.projects.bolubi[0]} label={t.projects.bolubiLabel} />
           </div>
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="font-display text-[clamp(3rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.03em] text-accent-soft">
-                {String(projects.length).padStart(2, '0')}
-              </p>
-              <p className="mt-3 max-w-xs text-muted">{t.projects.subtitle}</p>
-            </div>
-            <p className="label hidden items-center gap-3 md:flex">
-              {t.projects.scrollHint}
-              <ArrowRight size={14} className="pj-hint" />
-            </p>
-          </div>
+          <p className="max-w-xs text-muted">{t.projects.subtitle}</p>
         </div>
 
         {/* Project panels */}
@@ -212,16 +198,6 @@ export default function Projects() {
             key={p.slug}
             className="pj-panel flex shrink-0 flex-col justify-center gap-5 px-pad py-10 md:h-full md:w-[min(70vw,76vh)] md:px-0 md:pb-36 md:pl-[3vw] md:pt-24"
           >
-            <div className="pj-fade label flex items-center justify-between gap-4">
-              <span className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                {String(i + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
-              </span>
-              <span className="truncate">
-                {p.stack.join(' · ')}
-              </span>
-            </div>
-
             <button
               onClick={() => setOpenIndex(i)}
               aria-label={`${t.projects.viewMore}: ${tx(p.title, lang)}`}
@@ -258,15 +234,7 @@ export default function Projects() {
                   <SplitChars text={tx(p.title, lang)} charClass="pj-char" />
                 </h3>
                 <p className="pj-fade mt-3 line-clamp-2 max-w-2xl text-lg text-bone/80">
-                  {p.story ? (
-                    <>
-                      <span className="text-dim">“</span>
-                      {tx(p.story.hook, lang)}
-                      <span className="text-dim">”</span>
-                    </>
-                  ) : (
-                    tx(p.desc, lang)
-                  )}
+                  {tx(p.story?.hook ?? p.desc, lang)}
                 </p>
                 {websiteOf(p) && (
                   <a

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
-import { ScrollSmoother, ScrollTrigger, useGSAP, prefersReducedMotion } from '@/lib/gsap'
+import { ScrollSmoother, ScrollTrigger, useGSAP, prefersReducedMotion, navState } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 /**
@@ -29,6 +29,17 @@ function SmootherInit({ paused }: { paused: boolean }) {
     const smoother = ScrollSmoother.get()
     if (smoother) smoother.paused(paused)
     else document.documentElement.style.overflow = paused ? 'hidden' : ''
+
+    if (!paused && navState.scrollTo) {
+      const target = navState.scrollTo
+      navState.scrollTo = null
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh()
+        const s = ScrollSmoother.get()
+        if (s) s.scrollTo(target, false, 'top top')
+        else document.querySelector(target)?.scrollIntoView()
+      })
+    }
   }, [paused])
 
   // Text length changes with language, and web fonts shift layout once loaded

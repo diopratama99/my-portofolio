@@ -26,10 +26,46 @@
   --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
-  --font-sans: var(--font-grotesk), 'Space Grotesk', system-ui, sans-serif;
-  --font-display: var(--font-grotesk), 'Space Grotesk', system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: var(--font-poppins), 'Poppins', system-ui, sans-serif;
+  --font-display: var(--font-poppins), 'Poppins', system-ui, sans-serif;
   --spacing-pad: var(--pad);
+}
+
+/* Home page: every colour is mixed from --t (0 = dark, 1 = light), which ThemeFlow sets on scroll */
+.theme-flow,
+.theme-tokens {
+  --t: 0;
+  --ink: color-mix(in srgb, #f4f2ec calc(var(--t) * 100%), #07080b);
+  --ink-2: color-mix(in srgb, #e9e6de calc(var(--t) * 100%), #0d0f14);
+  --ink-3: color-mix(in srgb, #dedad0 calc(var(--t) * 100%), #161922);
+  --bone: color-mix(in srgb, #14161c calc(var(--t) * 100%), #eeece6);
+  --muted: color-mix(in srgb, #565a65 calc(var(--t) * 100%), #8b909c);
+  --dim: color-mix(in srgb, #7b7f8a calc(var(--t) * 100%), #5a5f6b);
+  --line: color-mix(in srgb, rgba(20, 22, 28, 0.12) calc(var(--t) * 100%), rgba(238, 236, 230, 0.1));
+  --line-strong: color-mix(in srgb, rgba(20, 22, 28, 0.26) calc(var(--t) * 100%), rgba(238, 236, 230, 0.22));
+  --accent: color-mix(in srgb, #3d50e0 calc(var(--t) * 100%), #5468ff);
+  --accent-soft: color-mix(in srgb, #3d50e0 calc(var(--t) * 100%), #a9b3ff);
+  color: var(--bone);
+}
+
+.theme-flow {
+  background: var(--ink);
+}
+
+/* Standalone light page (/contact) */
+.theme-light {
+  --ink: #f4f2ec;
+  --ink-2: #e9e6de;
+  --ink-3: #dedad0;
+  --bone: #14161c;
+  --muted: #565a65;
+  --dim: #7b7f8a;
+  --line: rgba(20, 22, 28, 0.12);
+  --line-strong: rgba(20, 22, 28, 0.26);
+  --accent: #3d50e0;
+  --accent-soft: #3d50e0;
+  background: var(--ink);
+  color: var(--bone);
 }
 
 html {
@@ -66,13 +102,9 @@ body {
 }
 
 @layer components {
-  /* Small mono caption used for meta text across the site */
+  /* Small secondary text */
   .label {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
     color: var(--muted);
   }
 
@@ -133,6 +165,7 @@ body {
   /* Word mask for split-text reveals; padding keeps descenders from being clipped */
   .mask {
     display: inline-block;
+    white-space: nowrap;
     overflow: hidden;
     vertical-align: top;
     padding: 0.08em 0.04em 0.12em;

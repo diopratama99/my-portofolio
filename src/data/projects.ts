@@ -59,8 +59,8 @@ export const projects: Project[] = [
         id: 'Dibuat setelah indikator bensin di motor saya mati.',
       },
       problem: {
-        en: 'The fuel bar on my motorbike stopped working, so I never knew when to refuel. Service schedules — oil changes, radiator top-ups and the like — were just as easy to forget.',
-        id: 'Indikator bar bensin di motor saya mati, jadi saya tidak pernah tahu kapan harus isi bensin. Jadwal servis — ganti oli, isi air radiator, dan sejenisnya — juga gampang terlupa.',
+        en: 'The fuel bar on my motorbike stopped working, so I never knew when to refuel. Service schedules like oil changes and radiator top-ups were just as easy to forget.',
+        id: 'Indikator bar bensin di motor saya mati, jadi saya tidak pernah tahu kapan harus isi bensin. Jadwal servis seperti ganti oli dan isi air radiator juga gampang terlupa.',
       },
       solution: {
         en: "Bensinku estimates when the tank is running low from my refills and trips, and reminds me when to fill up and when maintenance is due. It isn't 100% accurate, but a reminder beats guessing.",
@@ -105,12 +105,12 @@ export const projects: Project[] = [
         id: 'Keuangan pribadi, disesuaikan dengan cara saya mencatat.',
       },
       problem: {
-        en: "Most people's money isn't tracked neatly — mine included. The apps out there never quite fit how I wanted to record and review my spending.",
-        id: 'Keuangan kebanyakan orang tidak tercatat rapi — termasuk saya. Aplikasi yang ada tidak pernah benar-benar pas dengan cara saya ingin mencatat dan meninjau pengeluaran.',
+        en: "Most people's money isn't tracked neatly, mine included. The apps out there never quite fit how I wanted to record and review my spending.",
+        id: 'Keuangan kebanyakan orang tidak tercatat rapi, termasuk saya. Aplikasi yang ada tidak pernah benar-benar pas dengan cara saya ingin mencatat dan meninjau pengeluaran.',
       },
       solution: {
-        en: 'So I built my own, tailored to my needs — and it doubled as a project for my university coursework.',
-        id: 'Jadi saya membuat sendiri, disesuaikan dengan kebutuhan saya — sekaligus untuk tugas kuliah.',
+        en: 'So I built my own, tailored to my needs, and it doubled as a project for my university coursework.',
+        id: 'Jadi saya membuat sendiri, disesuaikan dengan kebutuhan saya, sekaligus untuk tugas kuliah.',
       },
     },
     category: 'mobile',
@@ -151,8 +151,8 @@ export const projects: Project[] = [
         id: 'Untuk semua hal menarik yang lewat saat scrolling.',
       },
       problem: {
-        en: "While scrolling social media I keep finding things worth keeping — a new tech stack, a useful tip — but they're scattered across different apps. Sometimes the uploader deletes the video before I get back to it.",
-        id: 'Saat scroll media sosial saya sering menemukan hal menarik — tech stack baru, tips yang berguna — tapi tersebar di berbagai aplikasi. Kadang uploader-nya juga sudah menghapus videonya sebelum sempat saya tonton.',
+        en: "While scrolling social media I keep finding things worth keeping, like a new tech stack or a useful tip, but they're scattered across different apps. Sometimes the uploader deletes the video before I get back to it.",
+        id: 'Saat scroll media sosial saya sering menemukan hal menarik, seperti tech stack baru atau tips yang berguna, tapi tersebar di berbagai aplikasi. Kadang uploader-nya juga sudah menghapus videonya sebelum sempat saya tonton.',
       },
       solution: {
         en: 'Ingatanku saves them all in one place as tidy notes. To make coming back fun, I added gamification with a virtual pet: bolubi, who "eats" everything you save.',
@@ -204,8 +204,8 @@ export const projects: Project[] = [
         id: 'Masalahnya mirip Ingatanku, tapi untuk komik. Saya suka baca manhwa, tapi beberapa situs tidak mendukung dengan baik, dan banyak yang penuh iklan.',
       },
       solution: {
-        en: 'Reamber brings the sources I read into one ad-free reader with a library, history and bookmarks — and new sources can be added through JSON recipes.',
-        id: 'Reamber mengumpulkan sumber bacaan saya dalam satu reader tanpa iklan, lengkap dengan library, riwayat, dan bookmark — dan sumber baru bisa ditambah lewat recipe JSON.',
+        en: 'Reamber brings the sources I read into one ad-free reader with a library, history and bookmarks. New sources can be added through JSON recipes.',
+        id: 'Reamber mengumpulkan sumber bacaan saya dalam satu reader tanpa iklan, lengkap dengan library, riwayat, dan bookmark. Sumber baru bisa ditambah lewat recipe JSON.',
       },
     },
     category: 'mobile',

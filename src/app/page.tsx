@@ -13,6 +13,7 @@ import Workspace from '@/components/Workspace'
 import Projects from '@/components/Projects'
 import OtherProjects from '@/components/OtherProjects'
 import Contact from '@/components/Contact'
+import ThemeFlow from '@/components/ThemeFlow'
 
 export default function Home() {
   const [ready, setReady] = useState(false)
@@ -22,7 +23,7 @@ export default function Home() {
     <>
       {/* Sections first: their ScrollTriggers must exist before the fixed UI reads them */}
       <SmoothScroll paused={!ready}>
-        <main>
+        <main className="theme-flow">
           <Hero ready={ready} />
           <About />
           <Projects />
@@ -31,6 +32,7 @@ export default function Home() {
           <Workspace />
           <Experience />
           <Contact />
+          <ThemeFlow />
         </main>
       </SmoothScroll>
 

@@ -4,7 +4,6 @@ import { useRef } from 'react'
 import { ShapeAvatar } from './ui/ShapeAvatar'
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { SectionLabel } from './ui/SectionLabel'
 import { mobileApps } from '@/data/projects'
 import { CAREER_START_YEAR } from '@/data/experience'
 
@@ -79,15 +78,13 @@ export default function About() {
 
   return (
     <section id="about" ref={root} className="relative px-pad py-[clamp(6rem,14vw,11rem)]">
-      <SectionLabel index="01" title={t.about.title} note={t.about.subtitle} />
-
-      <p className="ab-statement mt-12 max-w-[24ch] font-display text-[clamp(2rem,4.8vw,4.5rem)] font-medium leading-[1.05] tracking-[-0.035em] md:mt-20">
+      <h2 className="ab-statement max-w-[24ch] font-display text-[clamp(2rem,4.8vw,4.5rem)] font-medium leading-[1.05] tracking-[-0.035em]">
         {words.map((w, i) => (
           <span key={i} className="ab-word" style={w.color ? { color: w.color } : undefined}>
             {w.text}{' '}
           </span>
         ))}
-      </p>
+      </h2>
 
       <div className="ab-body mt-20 grid gap-16 md:mt-28 md:grid-cols-12">
         <div className="md:col-span-4">
@@ -107,7 +104,7 @@ export default function About() {
                 <p className="font-display text-[clamp(2rem,3.4vw,3.25rem)] font-semibold leading-none tracking-[-0.05em] tabular-nums">
                   {s.value}
                 </p>
-                <p className="label mt-3 !tracking-[0.1em]">{s.label}</p>
+                <p className="label mt-3">{s.label}</p>
               </div>
             ))}
           </div>
